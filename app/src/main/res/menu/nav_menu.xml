@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_alarm"
+            android:title="@string/alarm"
+            android:icon="@drawable/nav_alarm_icon"/>
+        <item
+            android:id="@+id/nav_friends"
+            android:title="@string/friends"
+            android:icon="@drawable/nav_friend_icon"/>
+        <item
+            android:id="@+id/nav_location"
+            android:title="@string/location"
+            android:icon="@drawable/nav_location_icon"/>
+        <item
+            android:id="@+id/nav_mail"
+            android:title="@string/mail"
+            android:icon="@drawable/nav_mail_icon"/>
+    </group>
+</menu>

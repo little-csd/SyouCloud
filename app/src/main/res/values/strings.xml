@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">SyouCloud</string>
+    <string name="alarm">Alarm</string>
+    <string name="friends">Friends</string>
+    <string name="location">Location</string>
+    <string name="mail">Mail</string>
+    <string name="userName">little_csd</string>
+    <string name="level">Lv.4</string>
+</resources>
