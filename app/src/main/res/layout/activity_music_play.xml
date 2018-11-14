@@ -1,41 +1,49 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@drawable/music_play_background"
     android:fitsSystemWindows="true"
-    android:background="@drawable/music_play_background">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="5dp">
+
         <ImageView
             android:id="@+id/music_play_back"
-            android:layout_margin="5dp"
-            android:src="@drawable/music_play_back_icon"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:src="@drawable/music_play_back_icon" />
 
         <LinearLayout
-            android:layout_marginStart="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_marginStart="5dp"
             android:orientation="vertical">
-            <TextView
+
+            <com.example.asus.syoucloud.util.AlwaysMarqueeTextView
                 android:id="@+id/music_play_title"
-                android:text="Snowdream"
-                android:textSize="16sp"
-                android:textColor="#ffffff"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:textColor="#ffffff"
+                android:textSize="18sp" />
+
             <TextView
-                android:id="@+id/music_play_album"
-                android:text="Bandari"
-                android:textSize="12sp"
-                android:textColor="#ffffff"
+                android:id="@+id/music_play_artist"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textColor="#ffffff"
+                android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -43,10 +51,38 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <FrameLayout
+            android:id="@+id/disk_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="4">
+
+            <ImageView
+                android:id="@+id/album_image"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center" />
+
+            <ImageView
+                android:id="@+id/disk_image"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:layout_gravity="center"
+                android:background="@drawable/disk" />
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/disk_pointer_circle"/>
+
+            <ImageView
+                android:id="@+id/music_play_pointer"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/disk_pointer" />
 
         </FrameLayout>
 
@@ -58,35 +94,86 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp">
+
+                <SeekBar
+                    android:id="@+id/music_play_seekBar"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:focusable="true"
+                    android:max="200"
+                    android:maxHeight="4dp"
+                    android:minHeight="4dp"
+                    android:progressDrawable="@drawable/layer_list_bar"
+                    android:thumb="@drawable/circle_shape_bar" />
+
+                <TextView
+                    android:id="@+id/music_play_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@id/music_play_seekBar"
+                    android:textColor="#a0ffffff"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/music_play_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/music_play_seekBar"
+                    android:textColor="#a0ffffff"
+                    android:textSize="12sp" />
 
             </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
                 <ImageView
                     android:id="@+id/music_play_begin"
-                    android:src="@drawable/play_button"
-                    android:layout_centerInParent="true"
                     android:layout_width="80dp"
-                    android:layout_height="80dp" />
+                    android:layout_height="80dp"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginStart="15dp"
+                    android:src="@drawable/play_button_selector" />
 
                 <ImageView
                     android:id="@+id/music_play_next"
-                    android:src="@drawable/next_button"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_centerVertical="true"
-                    android:layout_toEndOf="@id/music_play_begin"/>
+                    android:layout_toEndOf="@id/music_play_begin"
+                    android:src="@drawable/next_button_selector" />
 
                 <ImageView
                     android:id="@+id/music_play_last"
-                    android:src="@drawable/last_button"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_centerVertical="true"
-                    android:layout_toStartOf="@id/music_play_begin"/>
+                    android:layout_toStartOf="@id/music_play_begin"
+                    android:src="@drawable/last_button_selector" />
+
+                <ImageView
+                    android:id="@+id/music_play_style"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="15dp"
+                    android:src="@drawable/list_loop_selector" />
+
+                <ImageView
+                    android:id="@+id/music_play_list"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="15dp"
+                    android:src="@drawable/play_list_selector" />
             </RelativeLayout>
 
         </LinearLayout>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/notification_image"
+        android:layout_weight="3"
+        android:layout_width="0dp"
+        android:layout_height="100dp" />
+
+    <LinearLayout
+        android:layout_weight="7"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/notification_title"
+            android:singleLine="true"
+            android:gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:layout_width="match_parent"
+            android:textSize="18sp"
+            android:layout_height="30dp" />
+        <TextView
+            android:id="@+id/notification_artist"
+            android:singleLine="true"
+            android:gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+            <TextView
+                android:id="@+id/notification_lyric"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:gravity="center"
+                android:text="词"
+                android:textSize="18sp"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:id="@+id/notification_last"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:src="@drawable/notification_last"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:id="@+id/notification_play"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:background="@drawable/notification_play"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:id="@+id/notification_next"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:src="@drawable/notification_next"
+                android:layout_height="match_parent" />
+            <ImageView
+                android:id="@+id/notification_cancel"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:src="@drawable/notification_close"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
