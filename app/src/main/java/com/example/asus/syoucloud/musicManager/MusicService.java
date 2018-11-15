@@ -20,6 +20,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.example.asus.syoucloud.Constant;
+import com.example.asus.syoucloud.MusicPlayActivity;
 import com.example.asus.syoucloud.R;
 
 import java.io.IOException;
@@ -263,14 +264,21 @@ public class MusicService extends Service {
                     0, intentLyric, 0);
             remoteViews.setOnClickPendingIntent(R.id.notification_lyric, pendingLyric);
 
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Constant.PLAY);
-            filter.addAction(Constant.NEXT);
-            filter.addAction(Constant.LAST);
-            filter.addAction(Constant.CANCEL);
-            filter.addAction(Constant.LYRIC);
-            notificationReceiver = new NotificationReceiver();
-            registerReceiver(notificationReceiver, filter);
+            Intent intentMusicPlay = new Intent(MusicService.this, MusicPlayActivity.class);
+            PendingIntent pendingToActivity = PendingIntent.getActivity(MusicService.this,
+                    0, intentMusicPlay, 0);
+            remoteViews.setOnClickPendingIntent(R.id.notification_image, pendingToActivity);
+
+            if (notificationReceiver == null) {
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(Constant.PLAY);
+                filter.addAction(Constant.NEXT);
+                filter.addAction(Constant.LAST);
+                filter.addAction(Constant.CANCEL);
+                filter.addAction(Constant.LYRIC);
+                notificationReceiver = new NotificationReceiver();
+                registerReceiver(notificationReceiver, filter);
+            }
 
             notification = new NotificationCompat
                     .Builder(MusicService.this, "music")
@@ -294,10 +302,11 @@ public class MusicService extends Service {
         private void cancelNotification() {
             notificationManager.cancel(1);
             if (!isPlay) return;
-            if (bottomPlayListener != null) bottomPlayListener.onMusicStop();
-            if (musicPlayListener != null) musicPlayListener.onMusicStop();
             mediaPlayer.seekTo(0);
             mediaPlayer.pause();
+            isPlay = false;
+            if (bottomPlayListener != null) bottomPlayListener.onMusicStop();
+            if (musicPlayListener != null) musicPlayListener.onMusicStop();
             hasForeground = false;
         }
 

@@ -60,7 +60,8 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             updateHandler.postDelayed(this, 500);
             seekBar.setProgress(progress);
             musicCurrentTime.setText(MusicService.parseToString(seekBar.getProgress()));
-            if (progress >= seekBar.getMax() - 1) updateHandler.removeCallbacks(progressUpd);
+            if (seekBar.getMax() * 1000 - progress < 500)
+                updateHandler.removeCallbacks(progressUpd);
         }
     };
 
@@ -114,9 +115,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         albumImage = findViewById(R.id.album_image);
         seekBar = findViewById(R.id.music_play_seekBar);
 
-        bottomSheetDialog = new BottomSheetDialog(this);
-        View view = getLayoutInflater().inflate(R.layout.bottm_sheet_dialog_layout, null);
-        bottomSheetDialog.setContentView(view);
+
     }
 
     private void initData() {
@@ -134,8 +133,10 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         albumImage.setImageBitmap(bitmap);
 
         loopStyle = musicPlayer.getPlayStyle();
-        if (loopStyle == SINGLE_LOOP) musicLoopStyle.setImageResource(R.drawable.single_loop_selector);
-        else if (loopStyle == LIST_LOOP) musicLoopStyle.setImageResource(R.drawable.list_loop_selector);
+        if (loopStyle == SINGLE_LOOP)
+            musicLoopStyle.setImageResource(R.drawable.single_loop_selector);
+        else if (loopStyle == LIST_LOOP)
+            musicLoopStyle.setImageResource(R.drawable.list_loop_selector);
         else musicLoopStyle.setImageResource(R.drawable.shuffle_loop_selector);
 
         musicPlayer.setMusicPlayListener(this);
@@ -152,6 +153,9 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
     }
 
     private void initAnim() {
+        bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottm_sheet_dialog_layout, null);
+        bottomSheetDialog.setContentView(view);
         albumAnim = ObjectAnimator.ofFloat(albumImage,
                 "rotation", 0f, 360 * 100f);
         albumAnim.setDuration(25 * 100 * 1000);
@@ -227,7 +231,6 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             albumImage.setImageBitmap(bitmap);
         }
         albumAnim.start();
-
     }
 
     @Override
