@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -29,6 +30,8 @@ import com.example.asus.syoucloud.musicManager.MusicLoader;
 import com.example.asus.syoucloud.musicManager.MusicService;
 import com.example.asus.syoucloud.musicManager.onMusicListener;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements onMusicListener {
 
     private static final String TAG = "MainActivity";
@@ -45,11 +48,12 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             musicPlayer = (MusicService.MusicPlayer) service;
+            musicPlayer.setBottomPlayListener(MainActivity.this);
+            initData();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
         }
     };
 
@@ -58,10 +62,19 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         requestPermission();
-        initToolbar();
 
-        initData();
-//        initView();
+        Intent bindIntent = new Intent(this, MusicService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE);
+        initToolbar();
+        initView();
+        setOnClickListener();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(connection);
+        musicPlayer.deleteBottomPlayListener();
     }
 
     @Override
@@ -93,34 +106,34 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
     }
 
     private void initData() {
-//        Intent bindIntent = new Intent(this, MusicService.class);
-//        bindService(bindIntent, connection, BIND_AUTO_CREATE);
-
-        ContentResolver contentResolver = getContentResolver();
-        MusicLoader musicLoader = MusicLoader.getInstance(contentResolver, this);
-        /*List<MusicInfo> musicList = musicLoader.getMusicList();
-        musicPlayer.setMusicList(musicList);
-        if (musicList.size() > 0) musicPlayer.initMediaPlayer();*/
+        music = musicPlayer.getMusic();
+        bottomTitle.setText(music.getTitle());
+        bottomArtist.setText(music.getArtist());
+        Bitmap bmp = music.getBitmap();
+        if (bmp == null) {
+            bmp = MusicLoader.getBitmap(this, music.getUrl());
+            music.setBitmap(bmp);
+        }
+        bottomBitmap.setImageBitmap(bmp);
     }
 
     private void initView() {
         mDrawerLayout = findViewById(R.id.drawer_layout);
+        bottomPlay = findViewById(R.id.bottom_play);
+        bottomTitle = findViewById(R.id.bottom_title);
+        bottomArtist = findViewById(R.id.bottom_artist);
+        bottomBitmap = findViewById(R.id.bottom_bitmap);
+    }
+
+
+    private void setOnClickListener() {
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener((item) -> {
             mDrawerLayout.closeDrawers();
             return true;
         });
 
-        bottomPlay = findViewById(R.id.bottom_play);
         bottomPlay.setOnClickListener(v -> musicPlayer.playOrPause());
-
-        music = musicPlayer.getMusic();
-        bottomTitle = findViewById(R.id.bottom_title);
-        bottomTitle.setText(music.getTitle());
-        bottomArtist = findViewById(R.id.bottom_artist);
-        bottomArtist.setText(music.getArtist());
-        bottomBitmap = findViewById(R.id.bottom_bitmap);
-        bottomBitmap.setImageBitmap(music.getBitmap());
         LinearLayout bottomLinear = findViewById(R.id.bottom_text);
         bottomLinear.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, MusicPlayActivity.class);
@@ -158,7 +171,12 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
     @Override
     public void onMusicCompletion() {
         music = musicPlayer.getMusic();
-        bottomBitmap.setImageBitmap(music.getBitmap());
+        Bitmap bitmap = music.getBitmap();
+        if (bitmap == null) {
+            bitmap = MusicLoader.getBitmap(this, music.getUrl());
+            music.setBitmap(bitmap);
+        }
+        bottomBitmap.setImageBitmap(bitmap);
         bottomTitle.setText(music.getTitle());
         bottomArtist.setText(music.getArtist());
     }
@@ -177,5 +195,10 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
     public void onMusicPlayOrPause() {
         if (musicPlayer.isPlay()) bottomPlay.setImageResource(R.drawable.notification_pause);
         else bottomPlay.setImageResource(R.drawable.notification_play);
+    }
+
+    @Override
+    public void onMusicStop() {
+        onMusicPlayOrPause();
     }
 }

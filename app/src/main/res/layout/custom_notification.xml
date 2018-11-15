@@ -50,7 +50,7 @@
                 android:id="@+id/notification_play"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:background="@drawable/notification_play"
+                android:src="@drawable/notification_pause"
                 android:layout_height="match_parent" />
             <ImageView
                 android:id="@+id/notification_next"

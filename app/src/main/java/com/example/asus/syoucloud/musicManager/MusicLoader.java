@@ -2,7 +2,6 @@ package com.example.asus.syoucloud.musicManager;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,28 +9,21 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.example.asus.syoucloud.R;
 
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MusicLoader {
     private static final String TAG = "MusicLoader";
-
-    private Context context;
-    private List<MusicInfo> musicList;
     private static MusicLoader musicLoader;
     private static ContentResolver contentResolver;
-
     private final Uri contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     private final String sortOrder = MediaStore.Audio.Media.DATA;
-    private final String where =  "mime_type in ('audio/mpeg','audio/x-ms-wma') " +
-            "and _display_name <> 'audio' and is_music > 0 " ;
+    private final String where = "mime_type in ('audio/mpeg','audio/x-ms-wma') " +
+            "and _display_name <> 'audio' and is_music > 0 ";
+    private List<MusicInfo> musicList;
     private String[] projection = {
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
@@ -42,21 +34,32 @@ public class MusicLoader {
             MediaStore.Audio.Media.SIZE
     };
 
-    public static MusicLoader getInstance(ContentResolver mContentResolver, Context context) {
+    private MusicLoader() {
+        musicList = new ArrayList<>();
+        reSearch();
+    }
+
+    public static MusicLoader getInstance(ContentResolver mContentResolver) {
         if (musicLoader == null) {
             contentResolver = mContentResolver;
-            musicLoader = new MusicLoader(context);
+            musicLoader = new MusicLoader();
         }
         return musicLoader;
     }
 
-    private MusicLoader(Context context) {
-        musicList = new ArrayList<>();
-        this.context = context;
-        reSearch();
+    //todo change it to Async
+    public static Bitmap getBitmap(Context context, String url) {
+        Uri selectedAudio = Uri.parse(url);
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(context, selectedAudio); // the URI of audio file
+        byte[] artwork = retriever.getEmbeddedPicture();
+        if (artwork != null)
+            return BitmapFactory.decodeByteArray(artwork, 0, artwork.length);
+        else
+            return BitmapFactory.decodeResource(context.getResources(), R.drawable.play_button);
     }
 
-    public void reSearch() {
+    private void reSearch() {
         Cursor cursor = contentResolver.query(contentUri, projection, where,
                 null, sortOrder);
         musicList.clear();
@@ -78,30 +81,14 @@ public class MusicLoader {
                 String album = cursor.getString(albumCol);
                 String artist = cursor.getString(artistCol);
                 String url = cursor.getString(urlCol);
-                Bitmap bitmap = getBitmap(context, url);
-//                MusicInfo musicInfo = new MusicInfo(id, size , duration, title, album, artist, url, bitmap);
-//                musicList.add(musicInfo);
-            } while(cursor.moveToNext());
+                MusicInfo musicInfo = new MusicInfo(id, size, duration, title, album, artist, url);
+                musicList.add(musicInfo);
+            } while (cursor.moveToNext());
             cursor.close();
         }
     }
 
     public List<MusicInfo> getMusicList() {
         return musicList;
-    }
-
-    private Bitmap getBitmap(Context context, String url) {
-        Uri selectedAudio = Uri.parse(url);
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        if (selectedAudio == null) Log.i(TAG, "getBitmap: null");
-        retriever.setDataSource(context, selectedAudio); // the URI of audio file
-        return null;
-        /*byte[] artwork;
-
-        artwork = retriever.getEmbeddedPicture();
-        if (artwork != null)
-            return BitmapFactory.decodeByteArray(artwork, 0, artwork.length);
-        else
-            return BitmapFactory.decodeResource(context.getResources(), R.drawable.play_button);*/
     }
 }

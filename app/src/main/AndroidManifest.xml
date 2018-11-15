@@ -22,7 +22,6 @@
             android:name=".MusicPlayActivity"
             android:launchMode="singleTop" />
 
-        <receiver android:name=".musicManager.NotificationReceiver" />
         <service android:name=".musicManager.MusicService" />
     </application>
 

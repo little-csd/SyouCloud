@@ -13,7 +13,7 @@ public class MusicInfo {
     private Bitmap bitmap;
 
     MusicInfo(long id, long size, int duration, String title, String album, String artist,
-              String url, Bitmap bitmap) {
+              String url) {
         this.id = id;
         this.size = size;
         this.duration = duration;
@@ -21,7 +21,6 @@ public class MusicInfo {
         this.album = album;
         this.artist = artist;
         this.url = url;
-        this.bitmap = bitmap;
     }
 
     public long getId() {
@@ -46,6 +45,10 @@ public class MusicInfo {
 
     public Bitmap getBitmap() {
         return bitmap;
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
 
     public String getTitle() {

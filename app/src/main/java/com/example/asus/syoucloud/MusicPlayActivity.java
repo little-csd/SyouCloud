@@ -5,6 +5,7 @@ import android.animation.ValueAnimator;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.asus.syoucloud.musicManager.MusicInfo;
+import com.example.asus.syoucloud.musicManager.MusicLoader;
 import com.example.asus.syoucloud.musicManager.MusicService;
 import com.example.asus.syoucloud.musicManager.onMusicListener;
 
@@ -54,9 +56,11 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
     private Runnable progressUpd = new Runnable() {
         @Override
         public void run() {
+            int progress = musicPlayer.getCurrentProgress() / 1000;
             updateHandler.postDelayed(this, 500);
-            seekBar.setProgress(musicPlayer.getCurrentProgress() / 1000);
+            seekBar.setProgress(progress);
             musicCurrentTime.setText(MusicService.parseToString(seekBar.getProgress()));
+            if (progress >= seekBar.getMax() - 1) updateHandler.removeCallbacks(progressUpd);
         }
     };
 
@@ -64,6 +68,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             musicPlayer = (MusicService.MusicPlayer) service;
+            initData();
         }
 
         @Override
@@ -80,9 +85,11 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) actionBar.hide();
 
+        Intent bindIntent = new Intent(this, MusicService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE);
+
         initView();
         initAnim();
-        initData();
         setOnClickListener();
     }
 
@@ -90,6 +97,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
     protected void onDestroy() {
         super.onDestroy();
         musicPlayer.deleteMusicPlayListener();
+        unbindService(connection);
     }
 
     private void initView() {
@@ -112,16 +120,24 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
     }
 
     private void initData() {
-        Intent bindIntent = new Intent(this, MusicService.class);
-        bindService(bindIntent, connection, BIND_AUTO_CREATE);
-
         music = musicPlayer.getMusic();
         int barMax = music.getDuration() / 1000;
         seekBar.setMax(barMax);
         seekBar.setProgress(musicPlayer.getCurrentProgress() / 1000);
         updateHandler = new Handler();
 
+        Bitmap bitmap = music.getBitmap();
+        if (bitmap == null) {
+            bitmap = MusicLoader.getBitmap(this, music.getUrl());
+            music.setBitmap(bitmap);
+        }
+        albumImage.setImageBitmap(bitmap);
+
         loopStyle = musicPlayer.getPlayStyle();
+        if (loopStyle == SINGLE_LOOP) musicLoopStyle.setImageResource(R.drawable.single_loop_selector);
+        else if (loopStyle == LIST_LOOP) musicLoopStyle.setImageResource(R.drawable.list_loop_selector);
+        else musicLoopStyle.setImageResource(R.drawable.shuffle_loop_selector);
+
         musicPlayer.setMusicPlayListener(this);
         musicPlayArtist.setText(music.getArtist());
         musicPlayTitle.setText(music.getTitle());
@@ -150,13 +166,11 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             updateHandler.removeCallbacks(progressUpd);
             musicPlayer.last();
             updateHandler.post(progressUpd);
-
         });
         musicPlayNext.setOnClickListener(v -> {
             updateHandler.removeCallbacks(progressUpd);
             musicPlayer.next();
             updateHandler.post(progressUpd);
-
         });
         musicPlayList.setOnClickListener(v -> bottomSheetDialog.show());
         musicPlayImage.setOnClickListener(v -> musicPlayer.playOrPause());
@@ -201,11 +215,19 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
     public void onMusicCompletion() {
         music = musicPlayer.getMusic();
         seekBar.setMax(music.getDuration() / 1000);
+        seekBar.setProgress(0);
         musicDuration.setText(MusicService.parseToString(musicPlayer.getDuration() / 1000));
         musicPlayTitle.setText(music.getTitle());
         musicPlayArtist.setText(music.getArtist());
-        albumImage.setImageBitmap(music.getBitmap());
+        Bitmap bitmap = music.getBitmap();
+        if (bitmap != null) albumImage.setImageBitmap(bitmap);
+        else {
+            bitmap = MusicLoader.getBitmap(this, music.getUrl());
+            music.setBitmap(bitmap);
+            albumImage.setImageBitmap(bitmap);
+        }
         albumAnim.start();
+
     }
 
     @Override
@@ -228,14 +250,21 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
     public void onMusicPlayOrPause() {
         if (musicPlayer.isPlay()) {
             musicPlayImage.setImageResource(R.drawable.pause_button_selector);
-            albumAnim.pause();
-            updateHandler.removeCallbacks(progressUpd);
-            hasPause = true;
-        } else {
-            musicPlayImage.setImageResource(R.drawable.play_button_selector);
             if (hasPause) albumAnim.resume();
             else albumAnim.start();
             updateHandler.post(progressUpd);
+        } else {
+            musicPlayImage.setImageResource(R.drawable.play_button_selector);
+            albumAnim.pause();
+            updateHandler.removeCallbacks(progressUpd);
+            hasPause = true;
         }
+    }
+
+    @Override
+    public void onMusicStop() {
+        onMusicPlayOrPause();
+        seekBar.setProgress(0);
+        musicCurrentTime.setText(START_TIME);
     }
 }

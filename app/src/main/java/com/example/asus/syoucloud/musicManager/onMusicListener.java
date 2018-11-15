@@ -5,4 +5,5 @@ public interface onMusicListener {
     void onMusicLast();
     void onMusicNext();
     void onMusicPlayOrPause();
+    void onMusicStop();
 }
