@@ -28,6 +28,7 @@ import java.util.List;
 
 import static com.example.asus.syoucloud.Constant.LIST_LOOP;
 import static com.example.asus.syoucloud.Constant.SHUFFLE;
+import static com.example.asus.syoucloud.Constant.SINGLE_LOOP;
 
 public class MusicService extends Service {
     private NotificationManager notificationManager;
@@ -196,7 +197,11 @@ public class MusicService extends Service {
 
         public void next() {
             mediaPlayer.reset();
-            nextId();
+            if (playStyle != SINGLE_LOOP) nextId();
+            else {
+                id++;
+                if (id >= musicList.size()) id = 0;
+            }
             initMediaPlayer();
             mediaPlayer.start();
             isPlay = true;
@@ -310,6 +315,7 @@ public class MusicService extends Service {
             hasForeground = false;
         }
 
+        //todo add desktop lyric
         public void showLyric() {
 
         }

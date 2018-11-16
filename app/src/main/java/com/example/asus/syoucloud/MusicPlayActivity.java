@@ -1,7 +1,5 @@
 package com.example.asus.syoucloud;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -9,11 +7,10 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.design.widget.BottomSheetDialog;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.view.animation.LinearInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -32,10 +29,12 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
 
     private static final String TAG = "MusicPlayActivity";
     private static final String START_TIME = "00:00";
+    private boolean isDisk = false;
     private boolean hasPause = false;
     private int loopStyle;
 
-    private BottomSheetDialog bottomSheetDialog;
+    private DiskFragment diskFragment;
+    private LyricFragment lyricFragment;
     private SeekBar seekBar;
     private TextView musicPlayTitle;
     private TextView musicPlayArtist;
@@ -46,11 +45,8 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
     private ImageView musicPlayNext;
     private ImageView musicPlayLast;
     private ImageView musicLoopStyle;
-    private ImageView musicPlayList;
-    private ImageView albumImage;
     private MusicService.MusicPlayer musicPlayer;
     private MusicInfo music;
-    private ObjectAnimator albumAnim;
     private Handler updateHandler;
 
     private Runnable progressUpd = new Runnable() {
@@ -90,7 +86,6 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
 
         initView();
-        initAnim();
         setOnClickListener();
     }
 
@@ -111,14 +106,11 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         musicPlayLast = findViewById(R.id.music_play_last);
         musicPlayNext = findViewById(R.id.music_play_next);
         musicLoopStyle = findViewById(R.id.music_play_style);
-        musicPlayList = findViewById(R.id.music_play_list);
-        albumImage = findViewById(R.id.album_image);
         seekBar = findViewById(R.id.music_play_seekBar);
-
-
     }
 
     private void initData() {
+        changeFragment();
         music = musicPlayer.getMusic();
         int barMax = music.getDuration() / 1000;
         seekBar.setMax(barMax);
@@ -130,7 +122,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             bitmap = MusicLoader.getBitmap(this, music.getUrl());
             music.setBitmap(bitmap);
         }
-        albumImage.setImageBitmap(bitmap);
+        diskFragment.setBitmap(bitmap);
 
         loopStyle = musicPlayer.getPlayStyle();
         if (loopStyle == SINGLE_LOOP)
@@ -147,21 +139,9 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
 
         if (musicPlayer.isPlay()) {
             musicPlayImage.setImageResource(R.drawable.pause_button_selector);
-            albumAnim.start();
+            diskFragment.setIsPlay(true);
             updateHandler.post(progressUpd);
         }
-    }
-
-    private void initAnim() {
-        bottomSheetDialog = new BottomSheetDialog(this);
-        View view = getLayoutInflater().inflate(R.layout.bottm_sheet_dialog_layout, null);
-        bottomSheetDialog.setContentView(view);
-        albumAnim = ObjectAnimator.ofFloat(albumImage,
-                "rotation", 0f, 360 * 100f);
-        albumAnim.setDuration(25 * 100 * 1000);
-        albumAnim.setInterpolator(new LinearInterpolator());
-        albumAnim.setRepeatCount(ValueAnimator.INFINITE);
-        albumAnim.setRepeatMode(ValueAnimator.REVERSE);
     }
 
     private void setOnClickListener() {
@@ -176,7 +156,6 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             musicPlayer.next();
             updateHandler.post(progressUpd);
         });
-        musicPlayList.setOnClickListener(v -> bottomSheetDialog.show());
         musicPlayImage.setOnClickListener(v -> musicPlayer.playOrPause());
         musicLoopStyle.setOnClickListener(v -> {
             if (loopStyle == SINGLE_LOOP) {
@@ -213,6 +192,38 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
                 updateHandler.post(progressUpd);
             }
         });
+        FrameLayout framelayout = findViewById(R.id.center_fragment);
+        framelayout.setOnClickListener(v -> changeFragment());
+    }
+
+    private void changeFragment() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        if (isDisk) {
+            transaction.hide(diskFragment);
+            if (lyricFragment == null) {
+                lyricFragment = new LyricFragment();
+                transaction.add(R.id.center_fragment, lyricFragment).commit();
+                lyricFragment.setCurrentTime(musicPlayer.getCurrentProgress());
+            } else transaction.show(lyricFragment).commit();
+            if (musicPlayer.isPlay()) {
+                diskFragment.pauseAnim();
+                hasPause = true;
+            }
+        } else {
+            if (diskFragment == null) {
+                diskFragment = new DiskFragment();
+                transaction.add(R.id.center_fragment, diskFragment).commit();
+                if (musicPlayer.isPlay()) diskFragment.setIsPlay(true);
+            } else {
+                transaction.hide(lyricFragment);
+                transaction.show(diskFragment).commit();
+                if (musicPlayer.isPlay()) {
+                    if (!hasPause) diskFragment.startAnim();
+                    else diskFragment.resumeAnim();
+                }
+            }
+        }
+        isDisk = !isDisk;
     }
 
     @Override
@@ -224,13 +235,13 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         musicPlayTitle.setText(music.getTitle());
         musicPlayArtist.setText(music.getArtist());
         Bitmap bitmap = music.getBitmap();
-        if (bitmap != null) albumImage.setImageBitmap(bitmap);
+        if (bitmap != null) diskFragment.setImageBitmap(bitmap);
         else {
             bitmap = MusicLoader.getBitmap(this, music.getUrl());
             music.setBitmap(bitmap);
-            albumImage.setImageBitmap(bitmap);
+            diskFragment.setImageBitmap(bitmap);
         }
-        albumAnim.start();
+        diskFragment.startAnim();
     }
 
     @Override
@@ -253,12 +264,12 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
     public void onMusicPlayOrPause() {
         if (musicPlayer.isPlay()) {
             musicPlayImage.setImageResource(R.drawable.pause_button_selector);
-            if (hasPause) albumAnim.resume();
-            else albumAnim.start();
+            if (hasPause) diskFragment.resumeAnim();
+            else diskFragment.startAnim();
             updateHandler.post(progressUpd);
         } else {
             musicPlayImage.setImageResource(R.drawable.play_button_selector);
-            albumAnim.pause();
+            diskFragment.pauseAnim();
             updateHandler.removeCallbacks(progressUpd);
             hasPause = true;
         }
