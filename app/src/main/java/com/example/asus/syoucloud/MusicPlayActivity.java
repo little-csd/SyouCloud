@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -56,8 +57,6 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             updateHandler.postDelayed(this, 500);
             seekBar.setProgress(progress);
             musicCurrentTime.setText(MusicService.parseToString(seekBar.getProgress()));
-            if (seekBar.getMax() * 1000 - progress < 500)
-                updateHandler.removeCallbacks(progressUpd);
         }
     };
 
@@ -146,16 +145,8 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
 
     private void setOnClickListener() {
         musicPlayBack.setOnClickListener(v -> finish());
-        musicPlayLast.setOnClickListener(v -> {
-            updateHandler.removeCallbacks(progressUpd);
-            musicPlayer.last();
-            updateHandler.post(progressUpd);
-        });
-        musicPlayNext.setOnClickListener(v -> {
-            updateHandler.removeCallbacks(progressUpd);
-            musicPlayer.next();
-            updateHandler.post(progressUpd);
-        });
+        musicPlayLast.setOnClickListener(v -> musicPlayer.last());
+        musicPlayNext.setOnClickListener(v -> musicPlayer.next());
         musicPlayImage.setOnClickListener(v -> musicPlayer.playOrPause());
         musicLoopStyle.setOnClickListener(v -> {
             if (loopStyle == SINGLE_LOOP) {
@@ -189,6 +180,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 musicPlayer.seekTo(seekBar.getProgress());
+                if (lyricFragment != null) lyricFragment.seekTo(seekBar.getProgress());
                 updateHandler.post(progressUpd);
             }
         });
@@ -203,7 +195,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             if (lyricFragment == null) {
                 lyricFragment = new LyricFragment();
                 transaction.add(R.id.center_fragment, lyricFragment).commit();
-                lyricFragment.setCurrentTime(musicPlayer.getCurrentProgress());
+                lyricFragment.setMusicPlayer(musicPlayer);
             } else transaction.show(lyricFragment).commit();
             if (musicPlayer.isPlay()) {
                 diskFragment.pauseAnim();
@@ -234,6 +226,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         musicDuration.setText(MusicService.parseToString(musicPlayer.getDuration() / 1000));
         musicPlayTitle.setText(music.getTitle());
         musicPlayArtist.setText(music.getArtist());
+        diskFragment.startAnim();
         Bitmap bitmap = music.getBitmap();
         if (bitmap != null) diskFragment.setImageBitmap(bitmap);
         else {
@@ -241,7 +234,8 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             music.setBitmap(bitmap);
             diskFragment.setImageBitmap(bitmap);
         }
-        diskFragment.startAnim();
+        updateHandler.post(progressUpd);
+        lyricFragment.startUpd();
     }
 
     @Override
@@ -280,5 +274,12 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         onMusicPlayOrPause();
         seekBar.setProgress(0);
         musicCurrentTime.setText(START_TIME);
+    }
+
+    @Override
+    public void onStopUpd() {
+        if (lyricFragment != null)
+        lyricFragment.stopUpd();
+        updateHandler.removeCallbacks(progressUpd);
     }
 }

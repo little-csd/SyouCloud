@@ -6,4 +6,7 @@ public interface onMusicListener {
     void onMusicNext();
     void onMusicPlayOrPause();
     void onMusicStop();
+    default void onStopUpd() {
+
+    }
 }

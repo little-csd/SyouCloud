@@ -1,5 +1,6 @@
 package com.example.asus.syoucloud.musicManager;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -9,14 +10,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LrcHandle {
     private static final String TAG = "LrcHandle";
-    List<String> wordList = new ArrayList<>();
-    List<Integer> timeList = new ArrayList<>();
+    private List<Lyric> lyricList = new ArrayList<>();
 
     public void readLRC(String path) {
         File file = new File(path);
@@ -24,52 +25,52 @@ public class LrcHandle {
             FileInputStream inputStream = new FileInputStream(file);
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String s = "";
+            String s;
             while ((s = bufferedReader.readLine()) != null) {
-                addTime(s);
-                if (s.contains("[ar:") || s.contains("[ti:") || s.contains("[by:"))
-                    s = s.substring(s.indexOf(":") + 1, s.indexOf("]"));
-                else {
-                    String ss = s.substring(s.indexOf("["), s.indexOf("]") + 1);
-                    s = s.replace(ss, "");
+                if (s.contains("[ti:") || s.contains("[ar:") || s.contains("[al:") || s.contains("[by:"))
+                    continue;
+                String lyric= s, translate = null;
+                while (lyric.contains("]")) {
+                    String ss = lyric.substring(lyric.indexOf("["), lyric.indexOf("]") + 1);
+                    lyric = lyric.replace(ss, "");
                 }
-                wordList.add(s);
+                if (lyric.contains("/")) {
+                    translate = lyric.substring(lyric.indexOf("/") + 1).replace(" ", "");
+                    lyric = lyric.substring(0, lyric.indexOf("/")).replace(" ", "");
+                }
+                addTime(s, lyric, translate);
             }
             bufferedReader.close();
             inputStreamReader.close();
             inputStream.close();
         } catch (FileNotFoundException e) {
-            wordList.add("没有歌词文件");
             Log.i(TAG, "readLRC: 没有歌词文件");
         } catch (IOException e) {
-            wordList.add("歌词文件读取错误");
             Log.i(TAG, "readLRC: 歌词文件读取错误");
         }
+        Collections.sort(lyricList);
     }
 
-    public List<String> getWordList() {
-        return wordList;
+    public List<Lyric> getLyricList() {
+        return lyricList;
     }
 
-    public List<Integer> getTimeList() {
-        return timeList;
-    }
-
-    private void timeRead(String s) {
+    private void timeRead(String s, String lyric, String translate) {
         s = s.replace(".", ":");
         String time[] = s.split(":");
         int minute = Integer.parseInt(time[0]);
         int second = Integer.parseInt(time[1]);
         int millSecond = Integer.parseInt(time[2]);
-        timeList.add(millSecond * 10 + second * 1000 + minute * 1000 * 60);
+        int all = millSecond * 10 + second * 1000 + minute * 1000 * 60;
+        lyricList.add(new Lyric(all, lyric, translate));
     }
 
-    private void addTime(String s) {
-        Matcher matcher = Pattern.compile(
-                "\\[\\d{1,2}:\\d{1,2}([.:]\\d{1,2})?]").matcher(s);
-        if (matcher.find()) {
-            String str = matcher.group();
-            timeRead(str.substring(1, str.length() - 1));
+    private void addTime(String s, String lyric, String translate) {
+        while (s.contains("]")) {
+            String ss = s.substring(1, 9);
+            if (s.length() > 10) s = s.substring(10, s.length());
+            else s = "";
+            timeRead(ss, lyric, translate);
         }
     }
 }

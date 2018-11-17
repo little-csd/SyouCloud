@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.asus.syoucloud.musicManager.LrcHandle;
+import com.example.asus.syoucloud.musicManager.Lyric;
 import com.example.asus.syoucloud.musicManager.MusicInfo;
 import com.example.asus.syoucloud.musicManager.MusicLoader;
 import com.example.asus.syoucloud.musicManager.MusicService;
@@ -62,6 +63,17 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         requestPermission();
+
+        /*LrcHandle lrcHandle = new LrcHandle();
+        lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");
+        List<Lyric> lyricList = lrcHandle.getLyricList();
+        for (int i = 0; i < lyricList.size(); i++) {
+            Lyric lyric = lyricList.get(i);
+            String s = lyric.getTime() + "\n" + lyric.getText() + "\n";
+            if (lyric.getTranslate() != null) s += lyric.getTranslate();
+            Log.i(TAG, "onCreate: " + s);
+
+        }*/
 
         Intent bindIntent = new Intent(this, MusicService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE);

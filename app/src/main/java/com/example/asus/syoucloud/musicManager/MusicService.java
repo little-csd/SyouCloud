@@ -93,16 +93,8 @@ public class MusicService extends Service {
 
         private MusicPlayer() {
             mediaPlayer = new MediaPlayer();
-            id = 0;
-            mediaPlayer.setOnCompletionListener(mp -> {
-                mp.reset();
-                nextId();
-                initMediaPlayer();
-                mp.start();
-                if (musicPlayListener != null) musicPlayListener.onMusicCompletion();
-                if (bottomPlayListener != null) bottomPlayListener.onMusicCompletion();
-                updateNotification();
-            });
+            id = 166;
+            mediaPlayer.setOnCompletionListener(mp -> next());
         }
 
         public int getDuration() {
@@ -196,6 +188,7 @@ public class MusicService extends Service {
         }
 
         public void next() {
+            if (musicPlayListener != null) musicPlayListener.onStopUpd();
             mediaPlayer.reset();
             if (playStyle != SINGLE_LOOP) nextId();
             else {
@@ -306,13 +299,13 @@ public class MusicService extends Service {
 
         private void cancelNotification() {
             notificationManager.cancel(1);
+            hasForeground = false;
             if (!isPlay) return;
             mediaPlayer.seekTo(0);
             mediaPlayer.pause();
             isPlay = false;
             if (bottomPlayListener != null) bottomPlayListener.onMusicStop();
             if (musicPlayListener != null) musicPlayListener.onMusicStop();
-            hasForeground = false;
         }
 
         //todo add desktop lyric
