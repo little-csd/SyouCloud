@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import com.example.asus.syoucloud.musicManager.LrcHandle;
 import com.example.asus.syoucloud.musicManager.LyricView;
 import com.example.asus.syoucloud.musicManager.MusicService;
-import com.example.asus.syoucloud.musicManager.onChangeFragmentListener;
 import com.example.asus.syoucloud.musicManager.onLyricSeekToListener;
 
 public class LyricFragment extends Fragment {
@@ -20,7 +19,6 @@ public class LyricFragment extends Fragment {
     private static final String TAG = "LyricFragment";
     private MusicService.MusicPlayer musicPlayer;
     private onLyricSeekToListener seekToListener;
-    private onChangeFragmentListener changeFragmentListener;
     private LyricView lyricView;
     private Handler handler = new Handler();
 
@@ -42,7 +40,6 @@ public class LyricFragment extends Fragment {
             lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");
             lyricView.setLyricList(lrcHandle.getLyricList());
             lyricView.setSeekToListener(seekToListener);
-            lyricView.setChangeFragmentListener(changeFragmentListener);
         }).start();
         return view;
     }
@@ -67,9 +64,5 @@ public class LyricFragment extends Fragment {
 
     public void setSeekToListener(onLyricSeekToListener seekToListener) {
         this.seekToListener = seekToListener;
-    }
-
-    public void setOnChangeFragment(onChangeFragmentListener changeFragmentListener) {
-        this.changeFragmentListener = changeFragmentListener;
     }
 }

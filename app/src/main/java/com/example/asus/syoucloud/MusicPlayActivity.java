@@ -19,15 +19,13 @@ import android.widget.Toast;
 import com.example.asus.syoucloud.musicManager.MusicInfo;
 import com.example.asus.syoucloud.musicManager.MusicLoader;
 import com.example.asus.syoucloud.musicManager.MusicService;
-import com.example.asus.syoucloud.musicManager.onChangeFragmentListener;
 import com.example.asus.syoucloud.musicManager.onMusicListener;
 
 import static com.example.asus.syoucloud.Constant.LIST_LOOP;
 import static com.example.asus.syoucloud.Constant.SHUFFLE;
 import static com.example.asus.syoucloud.Constant.SINGLE_LOOP;
 
-public class MusicPlayActivity extends AppCompatActivity
-        implements onMusicListener, onChangeFragmentListener {
+public class MusicPlayActivity extends AppCompatActivity implements onMusicListener{
 
     private static final String TAG = "MusicPlayActivity";
     private static final String START_TIME = "00:00";
@@ -184,8 +182,8 @@ public class MusicPlayActivity extends AppCompatActivity
                 updateHandler.post(progressUpd);
             }
         });
-        FrameLayout framelayout = findViewById(R.id.center_fragment);
-        framelayout.setOnClickListener(v -> changeFragment());
+        ImageView imageView = findViewById(R.id.music_play_list);
+        imageView.setOnClickListener(v -> changeFragment());
     }
 
     private void changeFragment() {
@@ -197,7 +195,6 @@ public class MusicPlayActivity extends AppCompatActivity
                 transaction.add(R.id.center_fragment, lyricFragment).commit();
                 lyricFragment.setMusicPlayer(musicPlayer);
                 lyricFragment.setSeekToListener(musicPlayer);
-                lyricFragment.setOnChangeFragment(this);
             } else transaction.show(lyricFragment).commit();
             if (musicPlayer.isPlay()) {
                 diskFragment.pauseAnim();
@@ -283,10 +280,5 @@ public class MusicPlayActivity extends AppCompatActivity
         if (lyricFragment != null)
             lyricFragment.stopUpd();
         updateHandler.removeCallbacks(progressUpd);
-    }
-
-    @Override
-    public void onChangeFragment() {
-        changeFragment();
     }
 }

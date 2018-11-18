@@ -29,7 +29,6 @@ public class LyricView extends View {
     private GestureDetector mGestureDetector;
     private Scroller mScroller;
     private onLyricSeekToListener seekToListener;
-    private onChangeFragmentListener changeFragmentListener;
     private float mOffset;
     private float mSpacing;
     private boolean isShowTimeLine;
@@ -162,9 +161,6 @@ public class LyricView extends View {
                 adjustCenter();
                 postDelayed(hideTimelineRunnable, TIMELINE_KEEP_TIME);
             }
-        } else if (event.getAction() == MotionEvent.ACTION_DOWN && isShowTimeLine &&
-                !contain((int) event.getX(), (int) event.getY())) {
-            changeFragmentListener.onChangeFragment();
         }
         return mGestureDetector.onTouchEvent(event);
     }
@@ -217,10 +213,6 @@ public class LyricView extends View {
 
     public void setSeekToListener(onLyricSeekToListener seekToListener) {
         this.seekToListener = seekToListener;
-    }
-
-    public void setChangeFragmentListener(onChangeFragmentListener changeFragmentListener) {
-        this.changeFragmentListener = changeFragmentListener;
     }
 
     public boolean hasLyric() {
