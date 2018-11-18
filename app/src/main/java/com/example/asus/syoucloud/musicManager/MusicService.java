@@ -43,15 +43,23 @@ public class MusicService extends Service {
         super();
     }
 
+    public static String parseToString(int time) {
+        StringBuilder mTime = new StringBuilder();
+        int minute = time / 60, second = time % 60;
+        if (minute >= 10) mTime.append(minute).append(":");
+        else mTime.append("0").append(minute).append(":");
+        if (second >= 10) mTime.append(second);
+        else mTime.append("0").append(second);
+        return mTime.toString();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         musicPlayer = new MusicPlayer();
-        new Thread(() -> {
-            MusicLoader musicLoader = MusicLoader.getInstance(getContentResolver());
-            musicPlayer.setMusicList(musicLoader.getMusicList());
-            musicPlayer.initMediaPlayer();
-        }).start();
+        MusicLoader musicLoader = MusicLoader.getInstance(getContentResolver());
+        musicPlayer.setMusicList(musicLoader.getMusicList());
+        musicPlayer.initMediaPlayer();
     }
 
     @Override
@@ -71,17 +79,7 @@ public class MusicService extends Service {
         if (notificationReceiver != null) unregisterReceiver(notificationReceiver);
     }
 
-    public static String parseToString(int time) {
-        StringBuilder mTime = new StringBuilder();
-        int minute = time / 60, second = time % 60;
-        if (minute >= 10) mTime.append(minute).append(":");
-        else mTime.append("0").append(minute).append(":");
-        if (second >= 10) mTime.append(second);
-        else mTime.append("0").append(second);
-        return mTime.toString();
-    }
-
-    public class MusicPlayer extends Binder {
+    public class MusicPlayer extends Binder implements onLyricSeekToListener {
         private static final String TAG = "MusicPlayer";
         private boolean isPlay = false;
         private int playStyle = LIST_LOOP;
@@ -93,7 +91,7 @@ public class MusicService extends Service {
 
         private MusicPlayer() {
             mediaPlayer = new MediaPlayer();
-            id = 166;
+            id = 165;
             mediaPlayer.setOnCompletionListener(mp -> next());
         }
 
@@ -311,6 +309,12 @@ public class MusicService extends Service {
         //todo add desktop lyric
         public void showLyric() {
 
+        }
+
+        @Override
+        public boolean onSeekTo(int time) {
+            mediaPlayer.seekTo(time);
+            return true;
         }
     }
 

@@ -24,14 +24,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.musicManager.LrcHandle;
-import com.example.asus.syoucloud.musicManager.Lyric;
 import com.example.asus.syoucloud.musicManager.MusicInfo;
 import com.example.asus.syoucloud.musicManager.MusicLoader;
 import com.example.asus.syoucloud.musicManager.MusicService;
 import com.example.asus.syoucloud.musicManager.onMusicListener;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements onMusicListener {
 
@@ -64,19 +60,6 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
         setContentView(R.layout.activity_main);
         requestPermission();
 
-        /*LrcHandle lrcHandle = new LrcHandle();
-        lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");
-        List<Lyric> lyricList = lrcHandle.getLyricList();
-        for (int i = 0; i < lyricList.size(); i++) {
-            Lyric lyric = lyricList.get(i);
-            String s = lyric.getTime() + "\n" + lyric.getText() + "\n";
-            if (lyric.getTranslate() != null) s += lyric.getTranslate();
-            Log.i(TAG, "onCreate: " + s);
-
-        }*/
-
-        Intent bindIntent = new Intent(this, MusicService.class);
-        bindService(bindIntent, connection, BIND_AUTO_CREATE);
         initToolbar();
         initView();
         setOnClickListener();
@@ -107,12 +90,20 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
         startActivity(intent);
     }
 
+    public void bindService() {
+        Intent bindIntent = new Intent(this, MusicService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE);
+    }
+
     private void requestPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-        } else Log.i(TAG, "onCreate: succeed");
+        } else {
+            Log.i(TAG, "onCreate: succeed");
+            bindService();
+        }
     }
 
     private void initToolbar() {
@@ -176,9 +167,10 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case 1:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    bindService();
                     Log.i(TAG, "onRequestPermissionsResult: succeed");
-                else {
+                } else {
                     Log.i(TAG, "onRequestPermissionsResult: false");
                     Toast.makeText(this, "If we can not acquire this permission, "
                             + "the app can not work", Toast.LENGTH_SHORT).show();

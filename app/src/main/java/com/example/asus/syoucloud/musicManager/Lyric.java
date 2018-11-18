@@ -2,10 +2,13 @@ package com.example.asus.syoucloud.musicManager;
 
 import android.support.annotation.NonNull;
 
+import com.example.asus.syoucloud.Constant;
+
 public class Lyric implements Comparable<Lyric> {
     private int time;
     private String text;
     private String translate;
+    private float offset = Float.MIN_VALUE;
 
     public Lyric(int time, String text, String translate) {
         this.time = time;
@@ -23,6 +26,19 @@ public class Lyric implements Comparable<Lyric> {
 
     public String getTranslate() {
         return translate;
+    }
+
+    public float getOffset() {
+        return offset;
+    }
+
+    public void setOffset(float offset) {
+        this.offset = offset;
+    }
+
+    public float getHeight() {
+        if (translate != null) return Constant.DY;
+        else return Constant.DT;
     }
 
     @Override

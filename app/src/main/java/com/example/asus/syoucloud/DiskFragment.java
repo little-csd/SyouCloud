@@ -14,9 +14,9 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
-public class DiskFragment extends Fragment {
+import com.example.asus.syoucloud.musicManager.onLyricSeekToListener;
 
-    private static final String TAG = "DiskFragment";
+public class DiskFragment extends Fragment {
 
     private Bitmap bitmap;
     private ImageView albumImage;
@@ -28,7 +28,6 @@ public class DiskFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.disk_fragment, container, false);
         albumImage = view.findViewById(R.id.album_image);
-        Log.i(TAG, "onCreateView: ");
         return view;
     }
 
@@ -38,7 +37,6 @@ public class DiskFragment extends Fragment {
         albumImage.setImageBitmap(bitmap);
         initAnim();
         if (isPlay) startAnim();
-        Log.i(TAG, "onActivityCreated: ");
     }
 
     public void setImageBitmap(Bitmap bitmap) {

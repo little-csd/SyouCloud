@@ -9,13 +9,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.asus.syoucloud.musicManager.LrcHandle;
 import com.example.asus.syoucloud.musicManager.LyricView;
 import com.example.asus.syoucloud.musicManager.MusicService;
+import com.example.asus.syoucloud.musicManager.onChangeFragmentListener;
+import com.example.asus.syoucloud.musicManager.onLyricSeekToListener;
 
 public class LyricFragment extends Fragment {
 
     private static final String TAG = "LyricFragment";
     private MusicService.MusicPlayer musicPlayer;
+    private onLyricSeekToListener seekToListener;
+    private onChangeFragmentListener changeFragmentListener;
     private LyricView lyricView;
     private Handler handler = new Handler();
 
@@ -23,7 +28,7 @@ public class LyricFragment extends Fragment {
         @Override
         public void run() {
             handler.postDelayed(this, 100);
-            lyricView.invalidate();
+            lyricView.updateTime(musicPlayer.getCurrentProgress());
         }
     };
 
@@ -32,7 +37,13 @@ public class LyricFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.lyric_fragment, container, false);
         lyricView = view.findViewById(R.id.lyric_view);
-        lyricView.setMusicPlayer(musicPlayer);
+        new Thread(() -> {
+            LrcHandle lrcHandle = new LrcHandle();
+            lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");
+            lyricView.setLyricList(lrcHandle.getLyricList());
+            lyricView.setSeekToListener(seekToListener);
+            lyricView.setChangeFragmentListener(changeFragmentListener);
+        }).start();
         return view;
     }
 
@@ -54,7 +65,11 @@ public class LyricFragment extends Fragment {
         this.musicPlayer = musicPlayer;
     }
 
-    public void seekTo(int progress) {
-        lyricView.seekTo(progress * 1000);
+    public void setSeekToListener(onLyricSeekToListener seekToListener) {
+        this.seekToListener = seekToListener;
+    }
+
+    public void setOnChangeFragment(onChangeFragmentListener changeFragmentListener) {
+        this.changeFragmentListener = changeFragmentListener;
     }
 }

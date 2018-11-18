@@ -10,7 +10,6 @@ import android.os.IBinder;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -20,13 +19,15 @@ import android.widget.Toast;
 import com.example.asus.syoucloud.musicManager.MusicInfo;
 import com.example.asus.syoucloud.musicManager.MusicLoader;
 import com.example.asus.syoucloud.musicManager.MusicService;
+import com.example.asus.syoucloud.musicManager.onChangeFragmentListener;
 import com.example.asus.syoucloud.musicManager.onMusicListener;
 
 import static com.example.asus.syoucloud.Constant.LIST_LOOP;
 import static com.example.asus.syoucloud.Constant.SHUFFLE;
 import static com.example.asus.syoucloud.Constant.SINGLE_LOOP;
 
-public class MusicPlayActivity extends AppCompatActivity implements onMusicListener {
+public class MusicPlayActivity extends AppCompatActivity
+        implements onMusicListener, onChangeFragmentListener {
 
     private static final String TAG = "MusicPlayActivity";
     private static final String START_TIME = "00:00";
@@ -180,7 +181,6 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 musicPlayer.seekTo(seekBar.getProgress());
-                if (lyricFragment != null) lyricFragment.seekTo(seekBar.getProgress());
                 updateHandler.post(progressUpd);
             }
         });
@@ -196,6 +196,8 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
                 lyricFragment = new LyricFragment();
                 transaction.add(R.id.center_fragment, lyricFragment).commit();
                 lyricFragment.setMusicPlayer(musicPlayer);
+                lyricFragment.setSeekToListener(musicPlayer);
+                lyricFragment.setOnChangeFragment(this);
             } else transaction.show(lyricFragment).commit();
             if (musicPlayer.isPlay()) {
                 diskFragment.pauseAnim();
@@ -279,7 +281,12 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
     @Override
     public void onStopUpd() {
         if (lyricFragment != null)
-        lyricFragment.stopUpd();
+            lyricFragment.stopUpd();
         updateHandler.removeCallbacks(progressUpd);
+    }
+
+    @Override
+    public void onChangeFragment() {
+        changeFragment();
     }
 }

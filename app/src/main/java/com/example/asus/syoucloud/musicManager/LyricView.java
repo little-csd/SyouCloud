@@ -1,30 +1,110 @@
 package com.example.asus.syoucloud.musicManager;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Typeface;
+import android.os.Looper;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.LinearInterpolator;
+import android.widget.Scroller;
+
+import com.example.asus.syoucloud.Constant;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LyricView extends android.support.v7.widget.AppCompatTextView {
-    public static final int DT = 60;
-    private static final int DY = 120;
+public class LyricView extends View {
+    public static final int ADJUST_CENTER = 200;
+    public static final int TIMELINE_KEEP_TIME = 2000;
+
     private List<Lyric> lyricList = new ArrayList<>();
-    private Paint mLoseFocusPaint;
-    private Paint mOnFocusPaint;
-    private MusicService.MusicPlayer musicPlayer;
-    private float mX = 0;
-    private float mMiddleY = 0;
-    private float mY = 0;
-    private int moveStep = 0;
-    private int dMove = 12;
-    private boolean hasIndex[];
-    private boolean hasTranslate = false;
+    private Paint textPaint;
+    private Paint timePaint;
+    private ValueAnimator mAnimator;
+    private GestureDetector mGestureDetector;
+    private Scroller mScroller;
+    private onLyricSeekToListener seekToListener;
+    private onChangeFragmentListener changeFragmentListener;
+    private float mOffset;
+    private float mSpacing;
+    private boolean isShowTimeLine;
+    private boolean isTouch;
+    private boolean isFling;
+    private int mCurrentLine;
+    private int normalTextColor;
+    private int currentTextColor;
+    private int mAnimationDuration;
+    private int timePadding;
+    private int timeTextPadding;
+    private int timeTextHeight;
+    private Runnable hideTimelineRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (hasLyric() && isShowTimeLine) {
+                isShowTimeLine = false;
+                scroll(mCurrentLine);
+            }
+        }
+    };
+    private GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener
+            = new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onDown(MotionEvent e) {
+            if (hasLyric()) {
+                mScroller.forceFinished(true);
+                removeCallbacks(hideTimelineRunnable);
+                isTouch = true;
+                isShowTimeLine = true;
+                invalidate();
+                return true;
+            }
+            return super.onDown(e);
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            if (hasLyric()) {
+                mOffset += -distanceY;
+                mOffset = Math.min(mOffset, getOffset(0));
+                mOffset = Math.max(mOffset, getOffset(lyricList.size() - 1));
+                invalidate();
+                return true;
+            }
+            return super.onScroll(e1, e2, distanceX, distanceY);
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if (hasLyric()) {
+                mScroller.fling(0, (int) mOffset, 0, (int) velocityY, 0,
+                        0, (int) getOffset(lyricList.size() - 1), (int) getOffset(0));
+                isFling = true;
+                return true;
+            }
+            return super.onFling(e1, e2, velocityX, velocityY);
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            if (hasLyric() && isShowTimeLine && contain((int) e.getX(), (int) e.getY())) {
+                int centerLine = getCenterLine();
+                int time = lyricList.get(centerLine).getTime();
+                if (seekToListener.onSeekTo(time)) {
+                    isShowTimeLine = false;
+                    removeCallbacks(hideTimelineRunnable);
+                    mCurrentLine = centerLine;
+                    invalidate();
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
     public LyricView(Context context) {
         super(context);
@@ -41,117 +121,211 @@ public class LyricView extends android.support.v7.widget.AppCompatTextView {
         init();
     }
 
+    public void init() {
+        normalTextColor = Color.WHITE;
+        currentTextColor = Color.BLUE;
+        mSpacing = 60;
+        mOffset = 0;
+        mCurrentLine = 0;
+        isShowTimeLine = false;
+        mAnimationDuration = 1000;
+        timePadding = 10;
+        timeTextPadding = 100;
+        timeTextHeight = Constant.DY;
+
+        textPaint = new Paint();
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(50);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+
+        timePaint = new Paint();
+        timePaint.setAntiAlias(true);
+        timePaint.setAlpha(200);
+        timePaint.setColor(Color.WHITE);
+
+        mGestureDetector = new GestureDetector(getContext(), mSimpleOnGestureListener);
+        mGestureDetector.setIsLongpressEnabled(false);
+        mScroller = new Scroller(getContext());
+    }
+
+    public boolean contain(int x, int y) {
+        int centerY = getHeight() / 2;
+        return x >= timeTextPadding && x <= getWidth() - timeTextPadding &&
+                y >= centerY - timeTextHeight / 2 && y <= centerY + timeTextHeight / 2;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+            isTouch = false;
+            if (hasLyric() && !isFling) {
+                adjustCenter();
+                postDelayed(hideTimelineRunnable, TIMELINE_KEEP_TIME);
+            }
+        } else if (event.getAction() == MotionEvent.ACTION_DOWN && isShowTimeLine &&
+                !contain((int) event.getX(), (int) event.getY())) {
+            changeFragmentListener.onChangeFragment();
+        }
+        return mGestureDetector.onTouchEvent(event);
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (moveStep > 0) moveStep--;
-        int progress = musicPlayer.getCurrentProgress();
-        int index = 0;
-        for (int i = 1; i < lyricList.size(); i++) {
-            if (lyricList.get(i).getTime() > progress) {
-                index = i - 1;
-                if (!hasIndex[index]) {
-                    hasIndex[index] = true;
-                    moveStep = 10;
-                }
-                break;
-            }
+        int centerLine = getCenterLine(), centerY = getHeight() / 2;
+        if (isShowTimeLine) {
+            timePaint.setTextSize(30);
+            String time = MusicService.parseToString(lyricList.get(centerLine).getTime() / 1000);
+            canvas.drawText(time, timePadding, centerY + 10, timePaint);
+            canvas.drawLine(timeTextPadding, centerY, getWidth() - timeTextPadding,
+                    centerY, timePaint);
         }
 
-        Paint p = mLoseFocusPaint;
-        p.setTextAlign(Paint.Align.CENTER);
-        Paint p2 = mOnFocusPaint;
-        p2.setTextAlign(Paint.Align.CENTER);
+        canvas.translate(0, mOffset);
 
-        canvas.drawText(lyricList.get(index).getText(), mX, mMiddleY + moveStep * dMove, p2);
-
-        int alphaValue = 30;
-        float tempY = mMiddleY + moveStep * dMove;
-        for (int i = index - 1; i >= 0; i--) {
-            tempY -= DY;
-            if (tempY < 0) break;
-            Lyric lyric = lyricList.get(i);
-            p.setAlpha(255 - alphaValue);
-            if (hasTranslate) {
-                if (lyric.getTranslate() != null)
-                    canvas.drawText(lyric.getTranslate(), mX, tempY, p);
-                tempY -= DT;
-                if (tempY < 0) break;
+        float y = 0;
+        for (int i = 0; i < lyricList.size(); i++) {
+            if (i > 0) {
+                y += (lyricList.get(i - 1).getHeight() + lyricList.get(i).getHeight()) / 2
+                        + mSpacing;
             }
-            canvas.drawText(lyricList.get(i).getText(), mX, tempY, p);
-            alphaValue += 30;
+            if (i == mCurrentLine) textPaint.setColor(currentTextColor);
+            else textPaint.setColor(normalTextColor);
+            drawText(canvas, lyricList.get(i), y);
         }
+    }
 
-        if (lyricList.get(index).getTranslate() != null)
-            canvas.drawText(lyricList.get(index).getTranslate(), mX, mMiddleY + DT + moveStep * dMove, p2);
-        if (hasTranslate) tempY = mMiddleY + moveStep * dMove + DT;
-        else tempY = mMiddleY + moveStep * dMove;
-        alphaValue = 30;
-        for (int i = index + 1; i < lyricList.size(); i++) {
-            tempY += DY;
-            if (tempY > mY) break;
-            Lyric lyric = lyricList.get(i);
-            p.setAlpha(255 - alphaValue);
-            canvas.drawText(lyric.getText(), mX, tempY, p);
-            if (hasTranslate) {
-                tempY += DT;
-                if (tempY > mY) break;
-                if (lyric.getTranslate() != null)
-                    canvas.drawText(lyric.getTranslate(), mX, tempY, p);
-            }
-            alphaValue += 30;
+    public void drawText(Canvas canvas, Lyric lyric, float y) {
+        canvas.drawText(lyric.getText(), getWidth() / 2, y, textPaint);
+        if (lyric.getTranslate() != null) {
+            y += Constant.DT;
+            canvas.drawText(lyric.getTranslate(), getWidth() / 2, y, textPaint);
         }
+    }
+
+    public void setLyricList(List<Lyric> lyricList) {
+        this.lyricList = lyricList;
+        mCurrentLine = 0;
+        mOffset = getHeight() / 2;
+        isShowTimeLine = false;
+        isTouch = false;
+        isFling = false;
+        removeCallbacks(hideTimelineRunnable);
+        invalidate();
+    }
+
+    public void setSeekToListener(onLyricSeekToListener seekToListener) {
+        this.seekToListener = seekToListener;
+    }
+
+    public void setChangeFragmentListener(onChangeFragmentListener changeFragmentListener) {
+        this.changeFragmentListener = changeFragmentListener;
+    }
+
+    public boolean hasLyric() {
+        return !lyricList.isEmpty();
+    }
+
+    public int findCurrentLine(int time) {
+        int l = 0, r = lyricList.size() - 1;
+        while (l <= r) {
+            int mid = (l + r) / 2;
+            if (lyricList.get(mid).getTime() <= time) l = mid + 1;
+            else r = mid - 1;
+        }
+        return r;
+    }
+
+    public int getCenterLine() {
+        int centerLine = 0;
+        float minDistance = Float.MAX_VALUE;
+        for (int i = 0; i < lyricList.size(); i++) {
+            float distance = Math.abs(mOffset - getOffset(i));
+            if (distance < minDistance) {
+                minDistance = distance;
+                centerLine = i;
+            }
+        }
+        return centerLine;
+    }
+
+    public float getOffset(int line) {
+        if (lyricList.get(line).getOffset() != Float.MIN_VALUE)
+            return lyricList.get(line).getOffset();
+        float offset = getHeight() / 2;
+        for (int i = 1; i <= line; i++) {
+            offset -= (lyricList.get(i - 1).getHeight() + lyricList.get(i).getHeight()) / 2
+                    + mSpacing;
+        }
+        lyricList.get(line).setOffset(offset);
+        return offset;
+    }
+
+    public void updateTime(final int time) {
+        runOnUi(() -> {
+            if (!hasLyric()) return;
+            int line = findCurrentLine(time);
+            if (line != mCurrentLine) {
+                mCurrentLine = line;
+                if (!isShowTimeLine) scroll(line);
+                else invalidate();
+            }
+        });
+    }
+
+    private void scroll(int line) {
+        scroll(line, mAnimationDuration);
+    }
+
+    private void adjustCenter() {
+        scroll(getCenterLine(), ADJUST_CENTER);
+    }
+
+    private void scroll(int line, int duration) {
+        float offset = getOffset(line);
+        endAnimation();
+
+        mAnimator = ValueAnimator.ofFloat(mOffset, offset);
+        mAnimator.setDuration(duration);
+        mAnimator.setInterpolator(new LinearInterpolator());
+        mAnimator.addUpdateListener(animation -> {
+            mOffset = (float) animation.getAnimatedValue();
+            invalidate();
+        });
+        mAnimator.start();
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        mX = w * 0.5f;
-        mY = h;
-        mMiddleY = h * 0.4f;
-    }
+    public void computeScroll() {
+        if (mScroller.computeScrollOffset()) {
+            mOffset = mScroller.getCurrY();
+            invalidate();
+        }
 
-    public void setMusicPlayer(MusicService.MusicPlayer musicPlayer) {
-        this.musicPlayer = musicPlayer;
-    }
-
-    public void seekTo(int progress) {
-        for (int i = lyricList.size() - 1; i >= 0; i--)
-            if (lyricList.get(i).getTime() > progress) hasIndex[i] = false;
-            else break;
-    }
-
-    private void init() {
-        setFocusable(true);
-
-        hasIndex = new boolean[100];
-        LrcHandle lrcHandle = new LrcHandle();
-        lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");
-        lyricList = lrcHandle.getLyricList();
-
-        for (int i = 0; i < lyricList.size(); i++)
-            if (lyricList.get(i).getTranslate() != null) {
-                dMove = (DY + DT) / 10;
-                hasTranslate = true;
-                break;
+        if (isFling && mScroller.isFinished()) {
+            isFling = false;
+            if (hasLyric() && !isTouch) {
+                adjustCenter();
+                postDelayed(hideTimelineRunnable, TIMELINE_KEEP_TIME);
             }
-
-        mLoseFocusPaint = new Paint();
-        mLoseFocusPaint.setAntiAlias(true);
-        mLoseFocusPaint.setTextSize(50);
-        mLoseFocusPaint.setColor(Color.WHITE);
-        mLoseFocusPaint.setTypeface(Typeface.SERIF);
-
-        mOnFocusPaint = new Paint();
-        mOnFocusPaint.setAntiAlias(true);
-        mOnFocusPaint.setTextSize(50);
-        mOnFocusPaint.setColor(Color.BLUE);
-        mOnFocusPaint.setTypeface(Typeface.SANS_SERIF);
+        }
     }
 
-    private boolean hasLyric() {
-        return lyricList != null && lyricList.size() > 0;
+    private void endAnimation() {
+        if (mAnimator != null && mAnimator.isRunning())
+            mAnimator.end();
     }
 
+    private void runOnUi(Runnable r) {
+        if (Looper.myLooper() == Looper.getMainLooper())
+            r.run();
+        else post(r);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        removeCallbacks(hideTimelineRunnable);
+        super.onDetachedFromWindow();
+    }
 }
