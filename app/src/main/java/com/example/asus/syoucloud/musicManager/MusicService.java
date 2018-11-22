@@ -9,35 +9,56 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.asus.syoucloud.Constant;
+import com.example.asus.syoucloud.MusicApplication;
 import com.example.asus.syoucloud.MusicPlayActivity;
 import com.example.asus.syoucloud.R;
+import com.example.asus.syoucloud.util.Constant;
 
 import java.io.IOException;
 import java.util.List;
 
-import static com.example.asus.syoucloud.Constant.LIST_LOOP;
-import static com.example.asus.syoucloud.Constant.SHUFFLE;
-import static com.example.asus.syoucloud.Constant.SINGLE_LOOP;
+import static com.example.asus.syoucloud.util.Constant.LIST_LOOP;
+import static com.example.asus.syoucloud.util.Constant.SHUFFLE;
+import static com.example.asus.syoucloud.util.Constant.SINGLE_LOOP;
 
 public class MusicService extends Service {
     private NotificationManager notificationManager;
     private MusicPlayer musicPlayer;
     private NotificationReceiver notificationReceiver;
+    private OverlayWindowManager overlayWindowManager;
     private RemoteViews remoteViews;
     private Notification notification;
+    private WindowManager.LayoutParams params;
+    private WindowManager windowManager;
+    private View overlayNormal;
+    private View overlayClick;
+
     private boolean hasForeground = false;
-    private boolean hasLyric = false;
+    private boolean isLyricShow = false;
+    private boolean isLyricClick = false;
 
     public MusicService() {
         super();
@@ -57,7 +78,10 @@ public class MusicService extends Service {
     public void onCreate() {
         super.onCreate();
         musicPlayer = new MusicPlayer();
-        MusicLoader musicLoader = MusicLoader.getInstance(getContentResolver());
+
+        //todo change it to async
+        initWindow();
+        MusicLoader musicLoader = MusicLoader.getInstance(getContentResolver(), this);
         musicPlayer.setMusicList(musicLoader.getMusicList());
         musicPlayer.initMediaPlayer();
     }
@@ -77,6 +101,37 @@ public class MusicService extends Service {
     public void onDestroy() {
         super.onDestroy();
         if (notificationReceiver != null) unregisterReceiver(notificationReceiver);
+    }
+
+    private void initWindow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "Please allow draw overlay permission",
+                        Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+                return;
+            }
+        }
+
+        params = new WindowManager.LayoutParams();
+        windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        else params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        params.format = PixelFormat.TRANSPARENT;
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        params.gravity = Gravity.TOP | Gravity.START;
+        params.width = WindowManager.LayoutParams.MATCH_PARENT;
+        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        overlayNormal = inflater.inflate(R.layout.normal_overlay_window, null);
+        overlayClick = inflater.inflate(R.layout.click_overlay_window, null);
+
+        overlayWindowManager = new OverlayWindowManager();
     }
 
     public class MusicPlayer extends Binder implements onLyricSeekToListener {
@@ -154,8 +209,10 @@ public class MusicService extends Service {
                 mediaPlayer.pause();
                 remoteViews.setImageViewResource(R.id.notification_play, R.drawable.notification_play);
                 notificationManager.notify(1, notification);
+                overlayWindowManager.stopUpd();
             } else {
                 mediaPlayer.start();
+                overlayWindowManager.startUpd();
                 if (!hasForeground) {
                     hasForeground = true;
                     sendCustomNotification();
@@ -165,7 +222,7 @@ public class MusicService extends Service {
                 }
             }
             if (musicPlayListener != null) musicPlayListener.onMusicPlayOrPause();
-            if (bottomPlayListener != null) bottomPlayListener.onMusicPlayOrPause();
+            else if (bottomPlayListener != null) bottomPlayListener.onMusicPlayOrPause();
         }
 
         public void seekTo(int progress) {
@@ -187,6 +244,7 @@ public class MusicService extends Service {
 
         public void next() {
             if (musicPlayListener != null) musicPlayListener.onStopUpd();
+            if (overlayWindowManager != null) overlayWindowManager.stopUpd();
             mediaPlayer.reset();
             if (playStyle != SINGLE_LOOP) nextId();
             else {
@@ -196,15 +254,14 @@ public class MusicService extends Service {
             initMediaPlayer();
             mediaPlayer.start();
             isPlay = true;
+            if (overlayWindowManager != null) overlayWindowManager.startUpd();
             if (musicPlayListener != null) musicPlayListener.onMusicNext();
-            if (bottomPlayListener != null) bottomPlayListener.onMusicNext();
-            if (!hasForeground) {
-                sendCustomNotification();
-                hasForeground = true;
-            } else updateNotification();
+            else if (bottomPlayListener != null) bottomPlayListener.onMusicNext();
         }
 
         public void last() {
+            if (musicPlayListener != null) musicPlayListener.onStopUpd();
+            if (overlayWindowManager != null) overlayWindowManager.stopUpd();
             mediaPlayer.reset();
             if (playStyle != SHUFFLE) {
                 id--;
@@ -213,19 +270,16 @@ public class MusicService extends Service {
             initMediaPlayer();
             mediaPlayer.start();
             isPlay = true;
+            if (overlayWindowManager != null) overlayWindowManager.startUpd();
             if (musicPlayListener != null) musicPlayListener.onMusicLast();
-            if (bottomPlayListener != null) bottomPlayListener.onMusicLast();
-            if (!hasForeground) {
-                sendCustomNotification();
-                hasForeground = true;
-            } else updateNotification();
+            else if (bottomPlayListener != null) bottomPlayListener.onMusicLast();
         }
 
         private void sendCustomNotification() {
             notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = new NotificationChannel("music", "test for notice",
-                        NotificationManager.IMPORTANCE_HIGH);
+                NotificationChannel channel = new NotificationChannel("music",
+                        "create music notification", NotificationManager.IMPORTANCE_HIGH);
                 notificationManager.createNotificationChannel(channel);
             }
 
@@ -272,6 +326,11 @@ public class MusicService extends Service {
                 filter.addAction(Constant.LAST);
                 filter.addAction(Constant.CANCEL);
                 filter.addAction(Constant.LYRIC);
+                filter.addAction(Constant.UPDATE);
+                filter.addAction(Constant.UNLOCK);
+                filter.addAction(Constant.BACKGROUND);
+                filter.addAction(Constant.FOREGROUND);
+                filter.addAction(Constant.HEADSET);
                 notificationReceiver = new NotificationReceiver();
                 registerReceiver(notificationReceiver, filter);
             }
@@ -296,25 +355,206 @@ public class MusicService extends Service {
         }
 
         private void cancelNotification() {
-            notificationManager.cancel(1);
+            notificationManager.cancelAll();
             hasForeground = false;
             if (!isPlay) return;
             mediaPlayer.seekTo(0);
             mediaPlayer.pause();
             isPlay = false;
-            if (bottomPlayListener != null) bottomPlayListener.onMusicStop();
+
+            overlayWindowManager.removeLyric();
+            isLyricClick = isLyricShow = false;
+
             if (musicPlayListener != null) musicPlayListener.onMusicStop();
-        }
-
-        //todo add desktop lyric
-        public void showLyric() {
-
+            else if (bottomPlayListener != null) bottomPlayListener.onMusicStop();
         }
 
         @Override
         public boolean onSeekTo(int time) {
             mediaPlayer.seekTo(time);
+            if (!isPlay) playOrPause();
             return true;
+        }
+    }
+
+    private class OverlayWindowManager implements View.OnTouchListener, View.OnClickListener {
+
+        List<Lyric> lyricList;
+        Handler handler = new Handler();
+        private TextView clickLyric;
+        private TextView normalLyric;
+        private ImageView playImage;
+        private int normalLine = -1;
+        private int clickLine = -1;
+        private int statusBarHeight = -1;
+        private boolean isClick = false;
+        private float x, y;
+        private float touchStartX, touchStartY;
+        private Runnable updLyric = new Runnable() {
+            @Override
+            public void run() {
+                handler.postDelayed(this, 400);
+                int mLine = findCurrentLine(musicPlayer.getCurrentProgress());
+                if (isClick && clickLine == mLine) return;
+                if (!isClick && normalLine == mLine) return;
+                Lyric lyric = lyricList.get(mLine);
+                String text = lyric.getText();
+                if (lyric.getTranslate() != null)
+                    text = text + "\n" + lyric.getTranslate();
+                if (isClick) {
+                    clickLine = mLine;
+                    clickLyric.setText(text);
+                } else {
+                    normalLine = mLine;
+                    normalLyric.setText(text);
+                }
+            }
+        };
+
+        OverlayWindowManager() {
+            LrcHandle lrcHandle = new LrcHandle();
+            lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");
+            lyricList = lrcHandle.getLyricList();
+            normalLyric = overlayNormal.findViewById(R.id.normal_overlay_lyric);
+            clickLyric = overlayClick.findViewById(R.id.click_overlay_lyric);
+            int resourceId = getResources().getIdentifier("status_bar_height",
+                    "dimen", "android");
+            if (resourceId > 0) statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+            initView();
+        }
+
+        private void initView() {
+            overlayNormal.setOnTouchListener(this);
+            overlayNormal.setOnClickListener(this);
+            overlayClick.setOnClickListener(this);
+            overlayClick.setOnTouchListener(this);
+            playImage = overlayClick.findViewById(R.id.overlay_play);
+            ImageView lastImage = overlayClick.findViewById(R.id.overlay_last);
+            ImageView nextImage = overlayClick.findViewById(R.id.overlay_next);
+            ImageView closeImage = overlayClick.findViewById(R.id.overlay_close);
+            ImageView lockImage = overlayClick.findViewById(R.id.overlay_lock);
+
+            Intent closeIntent = new Intent(Constant.LYRIC);
+            closeImage.setOnClickListener(v -> sendBroadcast(closeIntent));
+
+            Intent nextIntent = new Intent(Constant.NEXT);
+            nextImage.setOnClickListener(v -> sendBroadcast(nextIntent));
+
+            Intent lastIntent = new Intent(Constant.LAST);
+            lastImage.setOnClickListener(v -> sendBroadcast(lastIntent));
+
+            Intent playIntent = new Intent(Constant.PLAY);
+            playImage.setOnClickListener(v -> sendBroadcast(playIntent));
+
+            lockImage.setOnClickListener(v -> lockLyric());
+        }
+
+        public void showLyric() {
+            windowManager.addView(overlayNormal, params);
+            if (musicPlayer.isPlay) playImage.setImageResource(R.drawable.pause_button);
+            else playImage.setImageResource(R.drawable.play_button);
+            handler.post(updLyric);
+        }
+
+        public void removeLyric() {
+            if (isClick) windowManager.removeView(overlayClick);
+            else windowManager.removeView(overlayNormal);
+            isClick = false;
+        }
+
+        public void stopUpd() {
+            if (!isLyricShow) return;
+            playImage.setImageResource(R.drawable.play_button);
+            handler.removeCallbacks(updLyric);
+        }
+
+        public void startUpd() {
+            if (!isLyricShow) return;
+            playImage.setImageResource(R.drawable.pause_button);
+            handler.post(updLyric);
+        }
+
+        private void lockLyric() {
+            params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+            onClick(clickLyric);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel("unlock",
+                        "unlock lyric", NotificationManager.IMPORTANCE_HIGH);
+                notificationManager.createNotificationChannel(channel);
+            }
+
+            Intent intent = new Intent(Constant.UNLOCK);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(MusicService.this,
+                    0, intent, 0);
+            Notification unlockNotification = new NotificationCompat
+                    .Builder(MusicService.this, "unlock")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.notification_large))
+                    .setContentTitle("Syoucloud")
+                    .setContentText("Click to unlock the lyric")
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .build();
+            unlockNotification.flags |= Notification.FLAG_NO_CLEAR;
+            notificationManager.notify(2, unlockNotification);
+        }
+
+        private int findCurrentLine(int time) {
+            int l = 0, r = lyricList.size() - 1;
+            while (l <= r) {
+                int mid = (l + r) / 2;
+                if (lyricList.get(mid).getTime() <= time) l = mid + 1;
+                else r = mid - 1;
+            }
+            return r;
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            x = event.getRawX();
+            y = event.getRawY() - statusBarHeight;
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    touchStartX = event.getX();
+                    touchStartY = event.getY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    updateViewPosition();
+                    touchStartX = touchStartY = 0;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    updateViewPosition();
+                    break;
+                default:
+            }
+            return false;
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (isClick) {
+                windowManager.addView(overlayNormal, params);
+                windowManager.removeView(overlayClick);
+            } else {
+                windowManager.addView(overlayClick, params);
+                windowManager.removeView(overlayNormal);
+            }
+            isClick = !isClick;
+            handler.removeCallbacks(updLyric);
+            handler.post(updLyric);
+        }
+
+        private void updateViewPosition() {
+            params.x = (int) (x - touchStartX);
+            params.y = (int) (y - touchStartY);
+            if (isClick) windowManager.updateViewLayout(overlayClick, params);
+            else windowManager.updateViewLayout(overlayNormal, params);
+        }
+
+        public void unlock() {
+            params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            windowManager.updateViewLayout(overlayNormal, params);
         }
     }
 
@@ -336,13 +576,45 @@ public class MusicService extends Service {
                 case Constant.CANCEL:
                     musicPlayer.cancelNotification();
                     break;
-                case Constant.LYRIC:
-                    if (!hasLyric) remoteViews.setTextColor(R.id.notification_lyric, Color.RED);
-                    else remoteViews.setTextColor(R.id.notification_lyric, Color.BLACK);
-                    hasLyric = !hasLyric;
-                    notificationManager.notify(1, notification);
-                    musicPlayer.showLyric();
+                case Constant.UPDATE:
+                    if (!hasForeground) {
+                        musicPlayer.sendCustomNotification();
+                        hasForeground = true;
+                    } else musicPlayer.updateNotification();
                     break;
+                case Constant.LYRIC:
+                    isLyricClick = !isLyricClick;
+                    if (isLyricClick) {
+                        remoteViews.setTextColor(R.id.notification_lyric, Color.RED);
+                        if (MusicApplication.getActiveActivity() == 0) {
+                            overlayWindowManager.showLyric();
+                            isLyricShow = true;
+                        }
+                    } else {
+                        remoteViews.setTextColor(R.id.notification_lyric, Color.BLACK);
+                        if (isLyricShow) {
+                            overlayWindowManager.removeLyric();
+                            isLyricShow = false;
+                        }
+                    }
+                    notificationManager.notify(1, notification);
+                    break;
+                case Constant.BACKGROUND:
+                    if (!isLyricClick) return;
+                    overlayWindowManager.showLyric();
+                    isLyricShow = true;
+                    break;
+                case Constant.FOREGROUND:
+                    if (!isLyricClick || !isLyricShow) return;
+                    overlayWindowManager.removeLyric();
+                    isLyricShow = false;
+                    break;
+                case Constant.UNLOCK:
+                    overlayWindowManager.unlock();
+                    break;
+                case Constant.HEADSET:
+                    if (intent.getIntExtra("state", 0) == 0 && musicPlayer.isPlay)
+                        musicPlayer.playOrPause();
                 default:
             }
         }

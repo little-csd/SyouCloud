@@ -2,7 +2,7 @@ package com.example.asus.syoucloud.musicManager;
 
 import android.support.annotation.NonNull;
 
-import com.example.asus.syoucloud.Constant;
+import com.example.asus.syoucloud.util.Constant;
 
 public class Lyric implements Comparable<Lyric> {
     private int time;

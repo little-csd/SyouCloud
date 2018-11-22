@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud;
+package com.example.asus.syoucloud.fragment;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.musicManager.LrcHandle;
 import com.example.asus.syoucloud.musicManager.LyricView;
 import com.example.asus.syoucloud.musicManager.MusicService;
@@ -16,7 +17,6 @@ import com.example.asus.syoucloud.musicManager.onLyricSeekToListener;
 
 public class LyricFragment extends Fragment {
 
-    private static final String TAG = "LyricFragment";
     private MusicService.MusicPlayer musicPlayer;
     private onLyricSeekToListener seekToListener;
     private LyricView lyricView;

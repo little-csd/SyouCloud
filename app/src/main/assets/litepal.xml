@@ -1,0 +1,7 @@
+<litepal>
+    <dbname value="MixList" />
+    <version value="1" />
+    <list>
+        <mapping class="com.example.asus.syoucloud.MixItem" />
+    </list>
+</litepal>

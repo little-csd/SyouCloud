@@ -4,10 +4,11 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -15,38 +16,45 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.musicManager.MusicInfo;
-import com.example.asus.syoucloud.musicManager.MusicLoader;
+import com.example.asus.syoucloud.fragment.BottomLayoutFragment;
 import com.example.asus.syoucloud.musicManager.MusicService;
-import com.example.asus.syoucloud.musicManager.onMusicListener;
+import com.example.asus.syoucloud.util.Constant;
+import com.example.asus.syoucloud.util.RecyclerDivider;
 
-public class MainActivity extends AppCompatActivity implements onMusicListener {
+public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
     private DrawerLayout mDrawerLayout;
-    private ImageView bottomPlay;
-    private ImageView bottomBitmap;
-    private TextView bottomTitle;
-    private TextView bottomArtist;
     private MusicService.MusicPlayer musicPlayer;
-    private MusicInfo music;
+    private MixListAdapter adapter;
+
+    private int mixId;
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             musicPlayer = (MusicService.MusicPlayer) service;
-            musicPlayer.setBottomPlayListener(MainActivity.this);
-            initData();
+            BottomLayoutFragment fragment = BottomLayoutFragment.getInstance();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.bottom_layout, fragment)
+                    .commit();
+            fragment.setMusicPlayer(musicPlayer);
         }
 
         @Override
@@ -60,9 +68,11 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
         setContentView(R.layout.activity_main);
         requestPermission();
 
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        mixId = pref.getInt("MixMax", 0);
+
         initToolbar();
         initView();
-        setOnClickListener();
     }
 
     @Override
@@ -70,16 +80,6 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
         super.onDestroy();
         unbindService(connection);
         musicPlayer.deleteBottomPlayListener();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (musicPlayer != null) {
-            ImageView imageButton = findViewById(R.id.bottom_play);
-            if (musicPlayer.isPlay()) imageButton.setImageResource(R.drawable.notification_pause);
-            else imageButton.setImageResource(R.drawable.notification_play);
-        }
     }
 
     @Override
@@ -116,40 +116,71 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
         }
     }
 
-    private void initData() {
-        music = musicPlayer.getMusic();
-        bottomTitle.setText(music.getTitle());
-        bottomArtist.setText(music.getArtist());
-        Bitmap bmp = music.getBitmap();
-        if (bmp == null) {
-            bmp = MusicLoader.getBitmap(this, music.getUrl());
-            music.setBitmap(bmp);
-        }
-        bottomBitmap.setImageBitmap(bmp);
-    }
-
     private void initView() {
         mDrawerLayout = findViewById(R.id.drawer_layout);
-        bottomPlay = findViewById(R.id.bottom_play);
-        bottomTitle = findViewById(R.id.bottom_title);
-        bottomArtist = findViewById(R.id.bottom_artist);
-        bottomBitmap = findViewById(R.id.bottom_bitmap);
-    }
-
-
-    private void setOnClickListener() {
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener((item) -> {
             mDrawerLayout.closeDrawers();
             return true;
         });
 
-        bottomPlay.setOnClickListener(v -> musicPlayer.playOrPause());
-        LinearLayout bottomLinear = findViewById(R.id.bottom_text);
-        bottomLinear.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, MusicPlayActivity.class);
+        ImageView mixAddImage = findViewById(R.id.mix_add);
+        mixAddImage.setOnClickListener(v -> mkMixAddDialog());
+
+        LinearLayout localMusic = findViewById(R.id.main_local_music);
+        localMusic.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, MusicShowActivity.class);
             startActivity(intent);
         });
+
+        RecyclerView mixRecycler = findViewById(R.id.mix_recycler);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        mixRecycler.setLayoutManager(layoutManager);
+        adapter = new MixListAdapter(this);
+        mixRecycler.setAdapter(adapter);
+        mixRecycler.addItemDecoration(new RecyclerDivider(this,
+                LinearLayoutManager.VERTICAL, 1, Constant.ITEM_DECORATION));
+    }
+
+    public void mkMixAddDialog() {
+        LayoutInflater factory = LayoutInflater.from(this);
+        final View view = factory.inflate(R.layout.add_mix_layout, null);
+        final EditText editTitle = view.findViewById(R.id.add_mix_title);
+        final EditText editPassword = view.findViewById(R.id.add_mix_password);
+        final EditText mEditPassword = view.findViewById(R.id.add_mix_password_again);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setIcon(R.drawable.mix_add_dialog_icon)
+                .setPositiveButton("OK", null)
+                .setTitle("New Mix")
+                .setView(view)
+                .show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(v1 -> {
+                    String title = editTitle.getText().toString();
+                    String password = editPassword.getText().toString();
+                    String mPassword = mEditPassword.getText().toString();
+                    if (title.equals("") || !mPassword.equals(password)) {
+                        Toast.makeText(MainActivity.this, "Please input title",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        addMix(title, editPassword.getText().toString());
+                        dialog.dismiss();
+                    }
+                });
+    }
+
+    private void addMix(String title, String password) {
+        MixItem item = new MixItem();
+        item.setTitle(title);
+        item.setPassword(password);
+        item.setAlbumId(mixId++);
+        item.save();
+        adapter.add(item);
+
+        SharedPreferences.Editor editor =
+                PreferenceManager.getDefaultSharedPreferences(this).edit();
+        editor.putInt("MixMax", mixId);
+        editor.apply();
     }
 
     @Override
@@ -178,39 +209,5 @@ public class MainActivity extends AppCompatActivity implements onMusicListener {
                 }
             default:
         }
-    }
-
-    @Override
-    public void onMusicCompletion() {
-        music = musicPlayer.getMusic();
-        Bitmap bitmap = music.getBitmap();
-        if (bitmap == null) {
-            bitmap = MusicLoader.getBitmap(this, music.getUrl());
-            music.setBitmap(bitmap);
-        }
-        bottomBitmap.setImageBitmap(bitmap);
-        bottomTitle.setText(music.getTitle());
-        bottomArtist.setText(music.getArtist());
-    }
-
-    @Override
-    public void onMusicLast() {
-        onMusicCompletion();
-    }
-
-    @Override
-    public void onMusicNext() {
-        onMusicCompletion();
-    }
-
-    @Override
-    public void onMusicPlayOrPause() {
-        if (musicPlayer.isPlay()) bottomPlay.setImageResource(R.drawable.notification_pause);
-        else bottomPlay.setImageResource(R.drawable.notification_play);
-    }
-
-    @Override
-    public void onMusicStop() {
-        onMusicPlayOrPause();
     }
 }

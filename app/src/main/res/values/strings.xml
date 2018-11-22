@@ -7,4 +7,12 @@
     <string name="userName">little_csd</string>
     <string name="level">Lv.4</string>
     <string name="music_list">My Music List</string>
+    <string name="local_music">Local Music</string>
+    <string name="recent_play">Recent play</string>
+    <string name="manage_downloads">Manage downloads</string>
+    <string name="favourites">Favs</string>
+    <string name="mix_created">Mix Created</string>
+    <string name="input_title">Mix title</string>
+    <string name="password">Password</string>
+    <string name="password_again">input password again</string>
 </resources>

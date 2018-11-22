@@ -2,23 +2,31 @@ package com.example.asus.syoucloud.musicManager;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.example.asus.syoucloud.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.asus.syoucloud.util.Constant.UPDATE;
+
 public class MusicLoader {
     private static final String TAG = "MusicLoader";
     private static MusicLoader musicLoader;
     private static ContentResolver contentResolver;
+    private static Bitmap defaultBmp;
     private final Uri contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     private final String sortOrder = MediaStore.Audio.Media.DATA;
     private final String where = "mime_type in ('audio/mpeg','audio/x-ms-wma') " +
@@ -39,24 +47,37 @@ public class MusicLoader {
         reSearch();
     }
 
-    public static MusicLoader getInstance(ContentResolver mContentResolver) {
+    public static MusicLoader getInstance(ContentResolver mContentResolver, Context context) {
         if (musicLoader == null) {
             contentResolver = mContentResolver;
             musicLoader = new MusicLoader();
+            defaultBmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.default_bitmap);
         }
         return musicLoader;
     }
 
-    //todo change it to Async
-    public static Bitmap getBitmap(Context context, String url) {
-        Uri selectedAudio = Uri.parse(url);
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(context, selectedAudio); // the URI of audio file
-        byte[] artwork = retriever.getEmbeddedPicture();
-        if (artwork != null)
-            return BitmapFactory.decodeByteArray(artwork, 0, artwork.length);
-        else
-            return BitmapFactory.decodeResource(context.getResources(), R.drawable.play_button);
+    // todo remember to change the size
+    public static void setBitmap(Context context, @NonNull ImageView igv, @NonNull MusicInfo music) {
+        new Thread(() -> {
+            if (music.getBitmap() == null) {
+                Bitmap bitmap;
+                String url = music.getUrl();
+                Uri selectedAudio = Uri.parse(url);
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(context, selectedAudio);
+                byte[] artwork = retriever.getEmbeddedPicture();
+
+                if (artwork != null)
+                    bitmap = BitmapFactory.decodeByteArray(artwork, 0, artwork.length);
+                else bitmap = defaultBmp;
+                music.setBitmap(bitmap);
+            }
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> igv.setImageBitmap(music.getBitmap()));
+
+            Intent intent = new Intent(UPDATE);
+            context.sendBroadcast(intent);
+        }).start();
     }
 
     private void reSearch() {

@@ -1,8 +1,10 @@
-package com.example.asus.syoucloud;
+package com.example.asus.syoucloud.fragment;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,11 +16,16 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
+import com.example.asus.syoucloud.R;
+import com.example.asus.syoucloud.musicManager.MusicInfo;
+import com.example.asus.syoucloud.musicManager.MusicLoader;
 import com.example.asus.syoucloud.musicManager.onLyricSeekToListener;
+
+import java.net.URL;
 
 public class DiskFragment extends Fragment {
 
-    private Bitmap bitmap;
+    private MusicInfo music;
     private ImageView albumImage;
     private ObjectAnimator albumAnim;
     private boolean isPlay = false;
@@ -34,30 +41,22 @@ public class DiskFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        albumImage.setImageBitmap(bitmap);
+        MusicLoader.setBitmap(getContext(), albumImage, music);
         initAnim();
         if (isPlay) startAnim();
-    }
-
-    public void setImageBitmap(Bitmap bitmap) {
-        albumImage.setImageBitmap(bitmap);
     }
 
     public void setIsPlay(boolean isPlay) {
         this.isPlay = isPlay;
     }
 
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
-    }
-
     public void initAnim() {
         albumAnim = ObjectAnimator.ofFloat(albumImage,
-                "rotation", 0f, 360 * 100f);
-        albumAnim.setDuration(25 * 100 * 1000);
+                "rotation", 0f, 360f);
+        albumAnim.setDuration(25 * 1000);
         albumAnim.setInterpolator(new LinearInterpolator());
         albumAnim.setRepeatCount(ValueAnimator.INFINITE);
-        albumAnim.setRepeatMode(ValueAnimator.REVERSE);
+        albumAnim.setRepeatMode(ValueAnimator.RESTART);
     }
 
     public void startAnim() {
@@ -71,4 +70,13 @@ public class DiskFragment extends Fragment {
     public void resumeAnim() {
         albumAnim.resume();
     }
+
+    public void setMusic(MusicInfo music) {
+        this.music = music;
+    }
+
+    public ImageView getAlbumImage() {
+        return albumImage;
+    }
 }
+

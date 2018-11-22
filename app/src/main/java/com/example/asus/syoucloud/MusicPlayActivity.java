@@ -10,20 +10,21 @@ import android.os.IBinder;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.asus.syoucloud.fragment.DiskFragment;
+import com.example.asus.syoucloud.fragment.LyricFragment;
 import com.example.asus.syoucloud.musicManager.MusicInfo;
 import com.example.asus.syoucloud.musicManager.MusicLoader;
 import com.example.asus.syoucloud.musicManager.MusicService;
 import com.example.asus.syoucloud.musicManager.onMusicListener;
 
-import static com.example.asus.syoucloud.Constant.LIST_LOOP;
-import static com.example.asus.syoucloud.Constant.SHUFFLE;
-import static com.example.asus.syoucloud.Constant.SINGLE_LOOP;
+import static com.example.asus.syoucloud.util.Constant.LIST_LOOP;
+import static com.example.asus.syoucloud.util.Constant.SHUFFLE;
+import static com.example.asus.syoucloud.util.Constant.SINGLE_LOOP;
 
 public class MusicPlayActivity extends AppCompatActivity implements onMusicListener{
 
@@ -115,12 +116,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         seekBar.setProgress(musicPlayer.getCurrentProgress() / 1000);
         updateHandler = new Handler();
 
-        Bitmap bitmap = music.getBitmap();
-        if (bitmap == null) {
-            bitmap = MusicLoader.getBitmap(this, music.getUrl());
-            music.setBitmap(bitmap);
-        }
-        diskFragment.setBitmap(bitmap);
+        diskFragment.setMusic(music);
 
         loopStyle = musicPlayer.getPlayStyle();
         if (loopStyle == SINGLE_LOOP)
@@ -226,15 +222,11 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         musicPlayTitle.setText(music.getTitle());
         musicPlayArtist.setText(music.getArtist());
         diskFragment.startAnim();
-        Bitmap bitmap = music.getBitmap();
-        if (bitmap != null) diskFragment.setImageBitmap(bitmap);
-        else {
-            bitmap = MusicLoader.getBitmap(this, music.getUrl());
-            music.setBitmap(bitmap);
-            diskFragment.setImageBitmap(bitmap);
-        }
+
+        MusicLoader.setBitmap(this, diskFragment.getAlbumImage(), music);
+
         updateHandler.post(progressUpd);
-        lyricFragment.startUpd();
+        if (lyricFragment != null) lyricFragment.startUpd();
     }
 
     @Override

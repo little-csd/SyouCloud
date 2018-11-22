@@ -22,65 +22,123 @@
                 android:background="@color/colorPrimary"
                 android:fitsSystemWindows="true"
                 android:theme="@style/Base.ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         </android.support.design.widget.AppBarLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
-            <android.support.v4.widget.NestedScrollView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            </android.support.v4.widget.NestedScrollView>
+            <LinearLayout
+                android:id="@+id/main_local_music"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/local_music_icon" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/local_music"
+                    android:textColor="#ff000000"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp">
+                android:layout_height="wrap_content">
+
                 <ImageView
-                    android:id="@+id/bottom_bitmap"
-                    android:layout_margin="5dp"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp" />
-                <LinearLayout
-                    android:id="@+id/bottom_text"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/recent_play_icon" />
+
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/bottom_title"
-                        android:layout_marginBottom="5dp"
-                        android:textSize="15sp"
-                        android:maxLines="1"
-                        android:layout_gravity="center_vertical"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:id="@+id/bottom_artist"
-                        android:layout_gravity="center_vertical"
-                        android:textSize="12sp"
-                        android:maxLines="1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-                <ImageView
-                    android:id="@+id/bottom_play"
-                    android:src="@drawable/notification_play"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent" />
-                <ImageView
-                    android:src="@drawable/notification_list"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent" />
+                    android:gravity="center_vertical"
+                    android:text="@string/recent_play"
+                    android:textColor="#ff000000"
+                    android:textSize="15sp" />
+
             </LinearLayout>
 
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/download_manager_icon" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/manage_downloads"
+                    android:textColor="#ff000000"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/favourite_icon" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/favourites"
+                    android:textColor="#ff000000"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:background="@color/backgroundColor"
+                android:layout_width="match_parent"
+                android:layout_height="30dp">
+                <TextView
+                    android:layout_marginStart="30dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/mix_created"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+                <ImageView
+                    android:id="@+id/mix_add"
+                    android:src="@drawable/mix_add_icon"
+                    android:layout_alignParentEnd="true"
+                    android:layout_width="45dp"
+                    android:layout_height="match_parent" />
+            </RelativeLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/mix_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+            </android.support.v7.widget.RecyclerView>
+
+            <FrameLayout
+                android:id="@+id/bottom_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
     </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView
@@ -89,8 +147,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:menu="@menu/nav_menu"
-        app:headerLayout="@layout/nav_header">
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/nav_menu">
 
     </android.support.design.widget.NavigationView>
 

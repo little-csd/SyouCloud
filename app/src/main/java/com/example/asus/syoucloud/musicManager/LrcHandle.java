@@ -1,6 +1,5 @@
 package com.example.asus.syoucloud.musicManager;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -12,8 +11,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class LrcHandle {
     private static final String TAG = "LrcHandle";
@@ -29,7 +26,7 @@ public class LrcHandle {
             while ((s = bufferedReader.readLine()) != null) {
                 if (s.contains("[ti:") || s.contains("[ar:") || s.contains("[al:") || s.contains("[by:"))
                     continue;
-                String lyric= s, translate = null;
+                String lyric = s, translate = null;
                 while (lyric.contains("]")) {
                     String ss = lyric.substring(lyric.indexOf("["), lyric.indexOf("]") + 1);
                     lyric = lyric.replace(ss, "");

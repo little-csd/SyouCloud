@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
 
-import com.example.asus.syoucloud.Constant;
+import com.example.asus.syoucloud.util.Constant;
 
 import java.util.ArrayList;
 import java.util.List;

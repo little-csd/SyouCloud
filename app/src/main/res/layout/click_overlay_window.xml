@@ -1,0 +1,52 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#78828282">
+
+    <TextView
+        android:id="@+id/click_overlay_lyric"
+        android:maxLines="2"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:lineSpacingMultiplier="1.5"
+        android:textColor="#2896da"
+        android:layout_width="match_parent"
+        android:layout_height="80dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <ImageView
+            android:id="@+id/overlay_lock"
+            android:src="@drawable/overlay_lock_icon"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+        <ImageView
+            android:id="@+id/overlay_last"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/last_button"/>
+        <ImageView
+            android:id="@+id/overlay_play"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/play_button"/>
+        <ImageView
+            android:id="@+id/overlay_next"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/next_button"/>
+        <ImageView
+            android:id="@+id/overlay_close"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/overlay_close"/>
+    </LinearLayout>
+</LinearLayout>
