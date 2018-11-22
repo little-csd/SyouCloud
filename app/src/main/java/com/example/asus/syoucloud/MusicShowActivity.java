@@ -3,9 +3,9 @@ package com.example.asus.syoucloud;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 
 import com.example.asus.syoucloud.fragment.BottomLayoutFragment;
 import com.example.asus.syoucloud.musicManager.MusicInfo;
@@ -13,9 +13,7 @@ import com.example.asus.syoucloud.musicManager.MusicService;
 
 import org.litepal.LitePal;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 public class MusicShowActivity extends AppCompatActivity {
 

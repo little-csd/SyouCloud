@@ -10,7 +10,7 @@ public class Lyric implements Comparable<Lyric> {
     private String translate;
     private float offset = Float.MIN_VALUE;
 
-    public Lyric(int time, String text, String translate) {
+    Lyric(int time, String text, String translate) {
         this.time = time;
         this.text = text;
         this.translate = translate;

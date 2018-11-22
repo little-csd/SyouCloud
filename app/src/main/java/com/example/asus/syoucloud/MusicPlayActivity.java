@@ -3,7 +3,6 @@ package com.example.asus.syoucloud;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26,9 +25,8 @@ import static com.example.asus.syoucloud.util.Constant.LIST_LOOP;
 import static com.example.asus.syoucloud.util.Constant.SHUFFLE;
 import static com.example.asus.syoucloud.util.Constant.SINGLE_LOOP;
 
-public class MusicPlayActivity extends AppCompatActivity implements onMusicListener{
+public class MusicPlayActivity extends AppCompatActivity implements onMusicListener {
 
-    private static final String TAG = "MusicPlayActivity";
     private static final String START_TIME = "00:00";
     private boolean isDisk = false;
     private boolean hasPause = false;
@@ -184,6 +182,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
 
     private void changeFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         if (isDisk) {
             transaction.hide(diskFragment);
             if (lyricFragment == null) {
@@ -222,9 +221,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         musicPlayTitle.setText(music.getTitle());
         musicPlayArtist.setText(music.getArtist());
         diskFragment.startAnim();
-
-        MusicLoader.setBitmap(this, diskFragment.getAlbumImage(), music);
-
+        MusicLoader.setBitmap(diskFragment.getAlbumImage(), music.getAlbumId());
         updateHandler.post(progressUpd);
         if (lyricFragment != null) lyricFragment.startUpd();
     }

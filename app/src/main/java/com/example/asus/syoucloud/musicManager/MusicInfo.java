@@ -1,19 +1,17 @@
 package com.example.asus.syoucloud.musicManager;
 
-import android.graphics.Bitmap;
-
 public class MusicInfo {
     private long id;
     private long size;
     private int duration;
+    private int albumId;
     private String title;
     private String album;
     private String artist;
     private String url;
-    private Bitmap bitmap;
 
     MusicInfo(long id, long size, int duration, String title, String album, String artist,
-              String url) {
+              String url, int albumId) {
         this.id = id;
         this.size = size;
         this.duration = duration;
@@ -21,6 +19,7 @@ public class MusicInfo {
         this.album = album;
         this.artist = artist;
         this.url = url;
+        this.albumId = albumId;
     }
 
     public long getId() {
@@ -43,14 +42,6 @@ public class MusicInfo {
         return duration;
     }
 
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -69,5 +60,9 @@ public class MusicInfo {
 
     public String getUrl() {
         return url;
+    }
+
+    public int getAlbumId() {
+        return albumId;
     }
 }

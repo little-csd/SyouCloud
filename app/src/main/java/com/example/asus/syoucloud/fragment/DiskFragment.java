@@ -2,14 +2,10 @@ package com.example.asus.syoucloud.fragment;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +15,6 @@ import android.widget.ImageView;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.musicManager.MusicInfo;
 import com.example.asus.syoucloud.musicManager.MusicLoader;
-import com.example.asus.syoucloud.musicManager.onLyricSeekToListener;
-
-import java.net.URL;
 
 public class DiskFragment extends Fragment {
 
@@ -41,7 +34,7 @@ public class DiskFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        MusicLoader.setBitmap(getContext(), albumImage, music);
+        MusicLoader.setBitmap(albumImage, music.getAlbumId());
         initAnim();
         if (isPlay) startAnim();
     }
@@ -57,6 +50,12 @@ public class DiskFragment extends Fragment {
         albumAnim.setInterpolator(new LinearInterpolator());
         albumAnim.setRepeatCount(ValueAnimator.INFINITE);
         albumAnim.setRepeatMode(ValueAnimator.RESTART);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        albumAnim.cancel();
     }
 
     public void startAnim() {

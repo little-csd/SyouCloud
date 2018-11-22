@@ -13,6 +13,10 @@ public class MusicApplication extends Application {
 
     private static int activeActivity = 0;
 
+    public static int getActiveActivity() {
+        return activeActivity;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -59,9 +63,5 @@ public class MusicApplication extends Application {
 
             }
         });
-    }
-
-    public static int getActiveActivity() {
-        return activeActivity;
     }
 }

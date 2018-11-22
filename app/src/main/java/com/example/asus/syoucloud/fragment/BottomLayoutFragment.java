@@ -59,7 +59,8 @@ public class BottomLayoutFragment extends Fragment implements onMusicListener {
     @Override
     public void onStop() {
         super.onStop();
-        musicPlayer.deleteBottomPlayListener();
+        if (musicPlayer != null)
+            musicPlayer.deleteBottomPlayListener();
     }
 
     @Override
@@ -81,9 +82,7 @@ public class BottomLayoutFragment extends Fragment implements onMusicListener {
         music = musicPlayer.getMusic();
         bottomTitle.setText(music.getTitle());
         bottomArtist.setText(music.getArtist());
-
-        MusicLoader.setBitmap(getContext(), bottomBitmap, music);
-
+        MusicLoader.setBitmap(bottomBitmap, music.getAlbumId());
         bottomPlay.setOnClickListener(v -> musicPlayer.playOrPause());
         bottomLinear.setOnClickListener(v -> {
             Intent intent = new Intent("MUSIC_PLAY_ACTIVITY");
@@ -94,7 +93,7 @@ public class BottomLayoutFragment extends Fragment implements onMusicListener {
     @Override
     public void onMusicCompletion() {
         music = musicPlayer.getMusic();
-        MusicLoader.setBitmap(getContext(), bottomBitmap, music);
+        MusicLoader.setBitmap(bottomBitmap, music.getAlbumId());
         bottomTitle.setText(music.getTitle());
         bottomArtist.setText(music.getArtist());
     }

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class LrcHandle {
+
     private static final String TAG = "LrcHandle";
     private List<Lyric> lyricList = new ArrayList<>();
 

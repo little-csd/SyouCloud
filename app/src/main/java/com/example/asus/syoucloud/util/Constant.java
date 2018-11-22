@@ -14,7 +14,6 @@ public class Constant {
     public static final String LAST = "com.example.asus.syoucloud.NotificationReceiver.Last";
     public static final String CANCEL = "com.example.asus.syoucloud.NotificationReceiver.Cancel";
     public static final String LYRIC = "com.example.asus.syoucloud.NotificationReceiver.Lyric";
-    public static final String UPDATE = "com.example.asus.syoucloud.NotificationReceiver.Update";
     public static final String UNLOCK = "com.example.asus.syoucloud.NotificationReceiver.Unlock";
     public static final String BACKGROUND = "com.example.asus.syoucloud.NotificationReceiver.Background";
     public static final String FOREGROUND = "com.example.asus.syoucloud.NotificationReceiver.Foreground";

@@ -45,6 +45,7 @@ import static com.example.asus.syoucloud.util.Constant.SHUFFLE;
 import static com.example.asus.syoucloud.util.Constant.SINGLE_LOOP;
 
 public class MusicService extends Service {
+
     private NotificationManager notificationManager;
     private MusicPlayer musicPlayer;
     private NotificationReceiver notificationReceiver;
@@ -146,7 +147,7 @@ public class MusicService extends Service {
 
         private MusicPlayer() {
             mediaPlayer = new MediaPlayer();
-            id = 165;
+            id = 61;
             mediaPlayer.setOnCompletionListener(mp -> next());
         }
 
@@ -254,6 +255,7 @@ public class MusicService extends Service {
             initMediaPlayer();
             mediaPlayer.start();
             isPlay = true;
+            updateNotification();
             if (overlayWindowManager != null) overlayWindowManager.startUpd();
             if (musicPlayListener != null) musicPlayListener.onMusicNext();
             else if (bottomPlayListener != null) bottomPlayListener.onMusicNext();
@@ -270,6 +272,7 @@ public class MusicService extends Service {
             initMediaPlayer();
             mediaPlayer.start();
             isPlay = true;
+            updateNotification();
             if (overlayWindowManager != null) overlayWindowManager.startUpd();
             if (musicPlayListener != null) musicPlayListener.onMusicLast();
             else if (bottomPlayListener != null) bottomPlayListener.onMusicLast();
@@ -285,7 +288,8 @@ public class MusicService extends Service {
 
             MusicInfo music = musicPlayer.getMusic();
             remoteViews = new RemoteViews(getPackageName(), R.layout.custom_notification);
-            remoteViews.setImageViewBitmap(R.id.notification_image, music.getBitmap());
+            remoteViews.setImageViewBitmap(R.id.notification_image, MusicLoader.getBitmap(
+                    getApplicationContext(), music.getAlbumId(), 160, 110));
             remoteViews.setTextViewText(R.id.notification_title, music.getTitle());
             remoteViews.setTextViewText(R.id.notification_artist, music.getArtist());
 
@@ -326,7 +330,6 @@ public class MusicService extends Service {
                 filter.addAction(Constant.LAST);
                 filter.addAction(Constant.CANCEL);
                 filter.addAction(Constant.LYRIC);
-                filter.addAction(Constant.UPDATE);
                 filter.addAction(Constant.UNLOCK);
                 filter.addAction(Constant.BACKGROUND);
                 filter.addAction(Constant.FOREGROUND);
@@ -347,7 +350,8 @@ public class MusicService extends Service {
 
         private void updateNotification() {
             MusicInfo music = getMusic();
-            remoteViews.setImageViewBitmap(R.id.notification_image, music.getBitmap());
+            remoteViews.setImageViewBitmap(R.id.notification_image, MusicLoader.getBitmap(
+                    getApplicationContext(), music.getAlbumId(), 160, 110));
             remoteViews.setTextViewText(R.id.notification_title, music.getTitle());
             remoteViews.setTextViewText(R.id.notification_artist, music.getArtist());
             remoteViews.setImageViewResource(R.id.notification_play, R.drawable.notification_pause);
@@ -575,12 +579,6 @@ public class MusicService extends Service {
                     break;
                 case Constant.CANCEL:
                     musicPlayer.cancelNotification();
-                    break;
-                case Constant.UPDATE:
-                    if (!hasForeground) {
-                        musicPlayer.sendCustomNotification();
-                        hasForeground = true;
-                    } else musicPlayer.updateNotification();
                     break;
                 case Constant.LYRIC:
                     isLyricClick = !isLyricClick;
