@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/music_show_search"
+        android:icon="@drawable/music_show_search_icon"
+        android:title="@string/back"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/music_show_delete"
+        android:icon="@drawable/music_show_delete_icon"
+        android:title="@string/delete"
+        app:showAsAction="withText" />
+</menu>

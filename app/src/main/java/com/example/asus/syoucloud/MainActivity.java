@@ -6,10 +6,14 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -30,6 +34,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.example.asus.syoucloud.adapter.MixItem;
+import com.example.asus.syoucloud.adapter.MixListAdapter;
 import com.example.asus.syoucloud.fragment.BottomLayoutFragment;
 import com.example.asus.syoucloud.musicManager.MusicService;
 import com.example.asus.syoucloud.util.Constant;
@@ -49,12 +55,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             musicPlayer = (MusicService.MusicPlayer) service;
-            BottomLayoutFragment fragment = BottomLayoutFragment.getInstance();
+            BottomLayoutFragment fragment = new BottomLayoutFragment();
+            fragment.setMusicPlayer(musicPlayer);
+            fragment.setType(1);
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.bottom_layout, fragment)
                     .commit();
-            fragment.setMusicPlayer(musicPlayer);
         }
 
         @Override
@@ -66,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        requestPermission();
+        requestReadPermission();
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         mixId = pref.getInt("MixMax", 0);
@@ -79,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(connection);
-        musicPlayer.deleteBottomPlayListener();
+        musicPlayer.deleteBottomPlayListener(1);
     }
 
     @Override
@@ -95,15 +102,26 @@ public class MainActivity extends AppCompatActivity {
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
     }
 
-    private void requestPermission() {
+    private void requestReadPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-        } else {
-            Log.i(TAG, "onCreate: succeed");
-            bindService();
+        } else requestOverlayWindowPermission();
+    }
+
+    private void requestOverlayWindowPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "Please allow draw overlay permission",
+                        Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 1);
+                return;
+            }
         }
+        bindService();
     }
 
     private void initToolbar() {
@@ -136,9 +154,9 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView mixRecycler = findViewById(R.id.mix_recycler);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mixRecycler.setLayoutManager(layoutManager);
-        adapter = new MixListAdapter(this);
+        adapter = new MixListAdapter(getApplicationContext());
         mixRecycler.setAdapter(adapter);
-        mixRecycler.addItemDecoration(new RecyclerDivider(this,
+        mixRecycler.addItemDecoration(new RecyclerDivider(getApplicationContext(),
                 LinearLayoutManager.VERTICAL, 1, Constant.ITEM_DECORATION));
     }
 
@@ -199,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case 1:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    bindService();
+                    requestOverlayWindowPermission();
                     Log.i(TAG, "onRequestPermissionsResult: succeed");
                 } else {
                     Log.i(TAG, "onRequestPermissionsResult: false");
@@ -207,6 +225,23 @@ public class MainActivity extends AppCompatActivity {
                             + "the app can not work", Toast.LENGTH_SHORT).show();
                     finish();
                 }
+            default:
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        switch (requestCode) {
+            case 1:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (!Settings.canDrawOverlays(this)) {
+                        Toast.makeText(this, "If we can not acquire this permission, "
+                                + "the app can not work", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
+                bindService();
+                break;
             default:
         }
     }

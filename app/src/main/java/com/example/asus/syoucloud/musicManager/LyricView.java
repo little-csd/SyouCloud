@@ -50,6 +50,7 @@ public class LyricView extends View {
             }
         }
     };
+
     private GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener
             = new GestureDetector.SimpleOnGestureListener() {
         @Override

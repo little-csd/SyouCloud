@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.asus.syoucloud.R;
-import com.example.asus.syoucloud.musicManager.LrcHandle;
 import com.example.asus.syoucloud.musicManager.LyricView;
 import com.example.asus.syoucloud.musicManager.MusicService;
 import com.example.asus.syoucloud.musicManager.onLyricSeekToListener;
@@ -35,19 +34,22 @@ public class LyricFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.lyric_fragment, container, false);
         lyricView = view.findViewById(R.id.lyric_view);
-        new Thread(() -> {
-            LrcHandle lrcHandle = new LrcHandle();
-            lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");
-            lyricView.setLyricList(lrcHandle.getLyricList());
-            lyricView.setSeekToListener(seekToListener);
-        }).start();
+        lyricView.setLyricList(musicPlayer.getLyricList());
+        lyricView.setSeekToListener(seekToListener);
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (lyricView != null)
         handler.post(updateRun);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        handler.removeCallbacks(updateRun);
     }
 
     public void startUpd() {
@@ -56,6 +58,12 @@ public class LyricFragment extends Fragment {
 
     public void stopUpd() {
         handler.removeCallbacks(updateRun);
+    }
+
+    public void updateLyric() {
+        handler.removeCallbacks(updateRun);
+        lyricView.setLyricList(musicPlayer.getLyricList());
+        handler.post(updateRun);
     }
 
     public void setMusicPlayer(MusicService.MusicPlayer musicPlayer) {

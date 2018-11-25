@@ -56,9 +56,9 @@ public class MusicLoader {
         return musicLoader;
     }
 
-    public static void setBitmap(@NonNull ImageView igv, int albumId) {
+    public static void setBitmap(Context context, @NonNull ImageView igv, int albumId) {
         if (igv.getHeight() == 0) {
-            igv.post(() -> setBitmap(igv, albumId));
+            igv.post(() -> setBitmap(context, igv, albumId));
             return;
         }
 
@@ -77,6 +77,8 @@ public class MusicLoader {
                 handler.post(() -> igv.setImageBitmap(artwork));
             } catch (FileNotFoundException e) {
                 Log.i(TAG, "setBitmap: 不存在该文件");
+                Bitmap bmp = getDefaultBitmap(context, igv.getWidth(), igv.getHeight());
+                runOnUi(() -> igv.setImageBitmap(bmp));
             }
         }).start();
     }
@@ -120,6 +122,13 @@ public class MusicLoader {
                 inSampleSize *= 2;
         }
         return inSampleSize;
+    }
+
+    private static void runOnUi(Runnable r) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(r);
+        } else r.run();
     }
 
     private void reSearch() {

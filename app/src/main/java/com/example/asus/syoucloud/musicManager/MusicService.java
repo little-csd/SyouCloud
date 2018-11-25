@@ -13,12 +13,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -30,21 +28,26 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.asus.syoucloud.MusicApplication;
 import com.example.asus.syoucloud.MusicPlayActivity;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.util.Constant;
+import com.example.asus.syoucloud.util.HttpUtil;
+import com.example.asus.syoucloud.util.LrcHandle;
+
+import org.litepal.LitePal;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.asus.syoucloud.util.Constant.LIST_LOOP;
 import static com.example.asus.syoucloud.util.Constant.SHUFFLE;
-import static com.example.asus.syoucloud.util.Constant.SINGLE_LOOP;
 
 public class MusicService extends Service {
+
+    private static final String TAG = "MusicService";
 
     private NotificationManager notificationManager;
     private MusicPlayer musicPlayer;
@@ -80,11 +83,13 @@ public class MusicService extends Service {
         super.onCreate();
         musicPlayer = new MusicPlayer();
 
-        //todo change it to async
-        initWindow();
-        MusicLoader musicLoader = MusicLoader.getInstance(getContentResolver(), this);
-        musicPlayer.setMusicList(musicLoader.getMusicList());
-        musicPlayer.initMediaPlayer();
+        new Thread(() -> {
+            MusicLoader musicLoader = MusicLoader.getInstance(getContentResolver(), this);
+            musicPlayer.setMusicList(musicLoader.getMusicList());
+            musicPlayer.initMediaPlayer();
+            musicPlayer.initLyricList();
+            initWindow();
+        }).start();
     }
 
     @Override
@@ -105,17 +110,6 @@ public class MusicService extends Service {
     }
 
     private void initWindow() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "Please allow draw overlay permission",
-                        Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
-                return;
-            }
-        }
-
         params = new WindowManager.LayoutParams();
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 
@@ -135,20 +129,61 @@ public class MusicService extends Service {
         overlayWindowManager = new OverlayWindowManager();
     }
 
+    public void getLyricAddress() {
+        MusicInfo music = musicPlayer.getMusic();
+        String address = Constant.DOWNLOADAPI + music.getTitle();
+        HttpUtil.sendHttpUtil(address, new HttpUtil.HttpCallBackListener() {
+            @Override
+            public void onFinish(String response) {
+                String lyricAddress = HttpUtil.parseJsonWithGSON(response);
+                if (lyricAddress == null) {
+                    Log.i(TAG, "onFinish: 找不到歌词");
+                    return;
+                }
+                LrcHandle lrcHandle = new LrcHandle();
+                lrcHandle.readLrcFromInternet(lyricAddress, new LrcHandle.DownloadCallback() {
+                    @Override
+                    public void onFinish() {
+                        Log.i(TAG, "onFinish: success");
+                        musicPlayer.setLyricList(lrcHandle.getLyricList());
+                    }
+
+                    @Override
+                    public void onError() {
+                        Log.i(TAG, "onError: ");
+                    }
+                });
+            }
+
+            @Override
+            public void onError() {
+                Log.i(TAG, "onError: getAddress error");
+            }
+        });
+    }
+
     public class MusicPlayer extends Binder implements onLyricSeekToListener {
         private static final String TAG = "MusicPlayer";
         private boolean isPlay = false;
         private int playStyle = LIST_LOOP;
         private MediaPlayer mediaPlayer;
         private int id;
+        private int albumId;
         private List<MusicInfo> musicList;
+        private List<Lyric> lyricList;
         private onMusicListener musicPlayListener;
         private onMusicListener bottomPlayListener;
+        private int bottomPlayListenerType;
 
         private MusicPlayer() {
             mediaPlayer = new MediaPlayer();
-            id = 61;
+            id = 0;
+            albumId = -1;
             mediaPlayer.setOnCompletionListener(mp -> next());
+        }
+
+        public boolean isPlay() {
+            return isPlay;
         }
 
         public int getDuration() {
@@ -159,10 +194,6 @@ public class MusicService extends Service {
             return mediaPlayer.getCurrentPosition();
         }
 
-        public boolean isPlay() {
-            return isPlay;
-        }
-
         public int getPlayStyle() {
             return playStyle;
         }
@@ -171,31 +202,63 @@ public class MusicService extends Service {
             playStyle = style;
         }
 
+        public List<Lyric> getLyricList() {
+            return lyricList;
+        }
+
+        void setLyricList(List<Lyric> lyricList) {
+            this.lyricList = lyricList;
+            updateLyricList();
+        }
+
         public MusicInfo getMusic() {
             return musicList.get(id);
         }
 
-        public void setMusicList(List<MusicInfo> musicList) {
+        void setMusicList(List<MusicInfo> musicList) {
             this.musicList = musicList;
+        }
+
+        private void updateLyricList() {
+            if (musicPlayListener != null) musicPlayListener.onUpdateLyric();
+            if (overlayWindowManager != null) overlayWindowManager.updateLyric();
         }
 
         public void setMusicPlayListener(onMusicListener listener) {
             musicPlayListener = listener;
         }
 
+        public void setBottomPlayListener(onMusicListener listener, int type) {
+            bottomPlayListener = listener;
+            this.bottomPlayListenerType = type;
+        }
+
         public void deleteMusicPlayListener() {
             musicPlayListener = null;
         }
 
-        public void setBottomPlayListener(onMusicListener listener) {
-            bottomPlayListener = listener;
+        public void deleteBottomPlayListener(int type) {
+            if (type == bottomPlayListenerType)
+                bottomPlayListener = null;
         }
 
-        public void deleteBottomPlayListener() {
-            bottomPlayListener = null;
+        private void initLyricList() {
+            LrcHandle lrcHandle = new LrcHandle();
+            lrcHandle.readLrcFromFile("/storage/emulated/0/Download/鳥の詩.lrc");
+            lyricList = lrcHandle.getLyricList();
+            /*if (musicList.size() == 0) return;
+            LrcText text = LitePal
+                    .where("songId=?", String.valueOf(musicList.get(id).getId()))
+                    .findFirst(LrcText.class);
+            if (text != null) lyricList = text.getLyricList();
+            else {
+                lyricList = new ArrayList<>();
+                lyricList.add(new Lyric(0, getString(R.string.lyric_hint), null));
+            }*/
         }
 
         private void initMediaPlayer() {
+            if (id >= musicList.size()) return;
             try {
                 mediaPlayer.setDataSource(musicList.get(id).getUrl());
                 mediaPlayer.prepare();
@@ -230,52 +293,39 @@ public class MusicService extends Service {
             mediaPlayer.seekTo(progress * 1000);
         }
 
-        private void nextId() {
-            switch (playStyle) {
-                case LIST_LOOP:
-                    id++;
-                    if (id >= musicList.size()) id = 0;
-                    return;
-                case SHUFFLE:
-                    id = (int) (Math.random() * musicList.size() + 0.5) - 1;
-                    return;
-                default:
-            }
-        }
-
         public void next() {
-            if (musicPlayListener != null) musicPlayListener.onStopUpd();
-            if (overlayWindowManager != null) overlayWindowManager.stopUpd();
-            mediaPlayer.reset();
-            if (playStyle != SINGLE_LOOP) nextId();
-            else {
+            if (playStyle == LIST_LOOP) {
                 id++;
                 if (id >= musicList.size()) id = 0;
-            }
-            initMediaPlayer();
-            mediaPlayer.start();
-            isPlay = true;
-            updateNotification();
-            if (overlayWindowManager != null) overlayWindowManager.startUpd();
-            if (musicPlayListener != null) musicPlayListener.onMusicNext();
-            else if (bottomPlayListener != null) bottomPlayListener.onMusicNext();
+            } else if (playStyle == SHUFFLE)
+                id = (int) (Math.random() * musicList.size() + 0.5) - 1;
+            playMusic();
         }
 
         public void last() {
+            if (playStyle == LIST_LOOP) {
+                id--;
+                if (id < 0) id = musicList.size() - 1;
+            } else if (playStyle == SHUFFLE)
+                id = (int) (Math.random() * musicList.size() + 0.5) - 1;
+            playMusic();
+        }
+
+        private void playMusic() {
             if (musicPlayListener != null) musicPlayListener.onStopUpd();
             if (overlayWindowManager != null) overlayWindowManager.stopUpd();
             mediaPlayer.reset();
-            if (playStyle != SHUFFLE) {
-                id--;
-                if (id < 0) id = musicList.size() - 1;
-            } else nextId();
+
             initMediaPlayer();
             mediaPlayer.start();
             isPlay = true;
-            updateNotification();
+            if (hasForeground) updateNotification();
+            else sendCustomNotification();
+
+            initLyricList();
             if (overlayWindowManager != null) overlayWindowManager.startUpd();
-            if (musicPlayListener != null) musicPlayListener.onMusicLast();
-            else if (bottomPlayListener != null) bottomPlayListener.onMusicLast();
+            if (musicPlayListener != null) musicPlayListener.onMusicNext();
+            else if (bottomPlayListener != null) bottomPlayListener.onMusicNext();
         }
 
         private void sendCustomNotification() {
@@ -334,6 +384,7 @@ public class MusicService extends Service {
                 filter.addAction(Constant.BACKGROUND);
                 filter.addAction(Constant.FOREGROUND);
                 filter.addAction(Constant.HEADSET);
+                filter.addAction(Constant.DOWNLOAD);
                 notificationReceiver = new NotificationReceiver();
                 registerReceiver(notificationReceiver, filter);
             }
@@ -379,12 +430,24 @@ public class MusicService extends Service {
             if (!isPlay) playOrPause();
             return true;
         }
+
+        public void changeAlbum(int mAlbumId, int position, List<MusicInfo> mList) {
+            if (mAlbumId == albumId) {
+                id = position;
+                playMusic();
+            } else {
+                albumId = mAlbumId;
+                musicList = mList;
+                id = position;
+                playMusic();
+            }
+        }
     }
 
     private class OverlayWindowManager implements View.OnTouchListener, View.OnClickListener {
 
         List<Lyric> lyricList;
-        Handler handler = new Handler();
+        Handler handler = new Handler(getMainLooper());
         private TextView clickLyric;
         private TextView normalLyric;
         private ImageView playImage;
@@ -392,8 +455,10 @@ public class MusicService extends Service {
         private int clickLine = -1;
         private int statusBarHeight = -1;
         private boolean isClick = false;
+        private boolean isLock = false;
         private float x, y;
         private float touchStartX, touchStartY;
+
         private Runnable updLyric = new Runnable() {
             @Override
             public void run() {
@@ -416,9 +481,8 @@ public class MusicService extends Service {
         };
 
         OverlayWindowManager() {
-            LrcHandle lrcHandle = new LrcHandle();
-            lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");
-            lyricList = lrcHandle.getLyricList();
+            lyricList = musicPlayer.getLyricList();
+            if (lyricList == null) lyricList = new ArrayList<>();
             normalLyric = overlayNormal.findViewById(R.id.normal_overlay_lyric);
             clickLyric = overlayClick.findViewById(R.id.click_overlay_lyric);
             int resourceId = getResources().getIdentifier("status_bar_height",
@@ -460,6 +524,12 @@ public class MusicService extends Service {
             handler.post(updLyric);
         }
 
+        public void updateLyric() {
+            handler.removeCallbacks(updLyric);
+            lyricList = musicPlayer.getLyricList();
+            handler.post(updLyric);
+        }
+
         public void removeLyric() {
             if (isClick) windowManager.removeView(overlayClick);
             else windowManager.removeView(overlayNormal);
@@ -479,6 +549,7 @@ public class MusicService extends Service {
         }
 
         private void lockLyric() {
+            isLock = true;
             params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
             onClick(clickLyric);
 
@@ -557,6 +628,7 @@ public class MusicService extends Service {
         }
 
         public void unlock() {
+            isLock = false;
             params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             windowManager.updateViewLayout(overlayNormal, params);
         }
@@ -592,6 +664,11 @@ public class MusicService extends Service {
                         remoteViews.setTextColor(R.id.notification_lyric, Color.BLACK);
                         if (isLyricShow) {
                             overlayWindowManager.removeLyric();
+                            if (overlayWindowManager.isLock) {
+                                overlayWindowManager.isLock = false;
+                                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                                notificationManager.cancel(2);
+                            }
                             isLyricShow = false;
                         }
                     }
@@ -613,6 +690,11 @@ public class MusicService extends Service {
                 case Constant.HEADSET:
                     if (intent.getIntExtra("state", 0) == 0 && musicPlayer.isPlay)
                         musicPlayer.playOrPause();
+                    break;
+                case Constant.DOWNLOAD:
+//                    if (musicPlayer.getLyricList().size() <= 1)
+//                        getLyricAddress();
+                    break;
                 default:
             }
         }

@@ -18,4 +18,6 @@ public class Constant {
     public static final String BACKGROUND = "com.example.asus.syoucloud.NotificationReceiver.Background";
     public static final String FOREGROUND = "com.example.asus.syoucloud.NotificationReceiver.Foreground";
     public static final String HEADSET = "android.intent.action.HEADSET_PLUG";
+    public static final String DOWNLOAD = "com.example.asus.syoucloud.NotificationReceiver.Download";
+    public static final String DOWNLOADAPI = "http://geci.me/api/lyric/";
 }

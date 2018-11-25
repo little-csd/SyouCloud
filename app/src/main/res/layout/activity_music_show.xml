@@ -1,9 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MusicShowActivity">
+    android:layout_height="match_parent">
 
-</android.support.constraint.ConstraintLayout>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/music_show_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/music_show_bottom"/>
+
+    <FrameLayout
+        android:id="@+id/music_show_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"/>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/music_show_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@null"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:fitsSystemWindows="true"
+        app:navigationIcon="@drawable/music_show_back_icon"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+    </android.support.v7.widget.Toolbar>
+
+</RelativeLayout>

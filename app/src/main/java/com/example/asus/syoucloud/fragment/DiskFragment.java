@@ -2,6 +2,7 @@ package com.example.asus.syoucloud.fragment;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,6 +16,7 @@ import android.widget.ImageView;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.musicManager.MusicInfo;
 import com.example.asus.syoucloud.musicManager.MusicLoader;
+import com.example.asus.syoucloud.util.Constant;
 
 public class DiskFragment extends Fragment {
 
@@ -28,13 +30,18 @@ public class DiskFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.disk_fragment, container, false);
         albumImage = view.findViewById(R.id.album_image);
+        ImageView downloadImage = view.findViewById(R.id.music_play_download);
+        downloadImage.setOnClickListener(v -> {
+            Intent intent = new Intent(Constant.DOWNLOAD);
+            if (getContext() != null) getContext().sendBroadcast(intent);
+        });
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        MusicLoader.setBitmap(albumImage, music.getAlbumId());
+        MusicLoader.setBitmap(getContext(), albumImage, music.getAlbumId());
         initAnim();
         if (isPlay) startAnim();
     }

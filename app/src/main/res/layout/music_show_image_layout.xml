@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    android:background="@drawable/music_show_background">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/music_show_album_card"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_above="@id/music_show_play_layout"
+        android:layout_marginBottom="15dp"
+        android:layout_marginStart="15dp"
+        app:cardCornerRadius="5dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/default_album_bitmap" />
+    </android.support.v7.widget.CardView>
+
+    <TextView
+        android:id="@+id/music_show_album_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/music_show_album_card"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_toEndOf="@id/music_show_album_card"
+        android:text="@string/password"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:id="@+id/music_show_play_layout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/corners_bg">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="15dp"
+            android:src="@drawable/notification_play" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:gravity="center_vertical"
+            android:text="@string/play" />
+    </LinearLayout>
+</RelativeLayout>

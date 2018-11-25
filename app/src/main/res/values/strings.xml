@@ -15,4 +15,8 @@
     <string name="input_title">Mix title</string>
     <string name="password">Password</string>
     <string name="password_again">input password again</string>
+    <string name="back">Return</string>
+    <string name="delete">Delete</string>
+    <string name="play">Play</string>
+    <string name="lyric_hint">找不到歌词</string>
 </resources>

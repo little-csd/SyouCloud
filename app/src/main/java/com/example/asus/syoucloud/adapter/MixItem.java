@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud;
+package com.example.asus.syoucloud.adapter;
 
 import com.example.asus.syoucloud.musicManager.MusicInfo;
 
@@ -14,7 +14,7 @@ public class MixItem extends LitePalSupport implements Serializable {
     private String password;
     private List<MusicInfo> musicList;
 
-    MixItem() {
+    public MixItem() {
         musicList = new ArrayList<>();
     }
 

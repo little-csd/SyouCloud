@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud;
+package com.example.asus.syoucloud.adapter;
 
 public class MusicItem {
     private String title;

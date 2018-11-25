@@ -91,6 +91,7 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         super.onDestroy();
         musicPlayer.deleteMusicPlayListener();
         unbindService(connection);
+        updateHandler.removeCallbacks(progressUpd);
     }
 
     private void initView() {
@@ -221,17 +222,9 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         musicPlayTitle.setText(music.getTitle());
         musicPlayArtist.setText(music.getArtist());
         diskFragment.startAnim();
-        MusicLoader.setBitmap(diskFragment.getAlbumImage(), music.getAlbumId());
+        MusicLoader.setBitmap(getApplicationContext(), diskFragment.getAlbumImage(), music.getAlbumId());
         updateHandler.post(progressUpd);
         if (lyricFragment != null) lyricFragment.startUpd();
-    }
-
-    @Override
-    public void onMusicLast() {
-        musicCurrentTime.setText(START_TIME);
-        seekBar.setProgress(0);
-        musicPlayImage.setImageResource(R.drawable.pause_button_selector);
-        onMusicCompletion();
     }
 
     @Override
@@ -269,5 +262,10 @@ public class MusicPlayActivity extends AppCompatActivity implements onMusicListe
         if (lyricFragment != null)
             lyricFragment.stopUpd();
         updateHandler.removeCallbacks(progressUpd);
+    }
+
+    @Override
+    public void onUpdateLyric() {
+        lyricFragment.updateLyric();
     }
 }

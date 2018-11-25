@@ -20,7 +20,6 @@ import com.example.asus.syoucloud.musicManager.onMusicListener;
 
 public class BottomLayoutFragment extends Fragment implements onMusicListener {
 
-    private static BottomLayoutFragment fragment;
     private ImageView bottomPlay;
     private ImageView bottomBitmap;
     private TextView bottomTitle;
@@ -28,12 +27,7 @@ public class BottomLayoutFragment extends Fragment implements onMusicListener {
     private LinearLayout bottomLinear;
     private MusicInfo music;
     private MusicService.MusicPlayer musicPlayer;
-
-    public static BottomLayoutFragment getInstance() {
-        if (fragment == null)
-            fragment = new BottomLayoutFragment();
-        return fragment;
-    }
+    private int type = 1;
 
     @Nullable
     @Override
@@ -60,7 +54,7 @@ public class BottomLayoutFragment extends Fragment implements onMusicListener {
     public void onStop() {
         super.onStop();
         if (musicPlayer != null)
-            musicPlayer.deleteBottomPlayListener();
+            musicPlayer.deleteBottomPlayListener(type);
     }
 
     @Override
@@ -76,13 +70,13 @@ public class BottomLayoutFragment extends Fragment implements onMusicListener {
     public void initData() {
         if (musicPlayer == null) return;
 
-        musicPlayer.setBottomPlayListener(this);
+        musicPlayer.setBottomPlayListener(this, type);
 
         onMusicPlayOrPause();
         music = musicPlayer.getMusic();
         bottomTitle.setText(music.getTitle());
         bottomArtist.setText(music.getArtist());
-        MusicLoader.setBitmap(bottomBitmap, music.getAlbumId());
+        MusicLoader.setBitmap(getContext(), bottomBitmap, music.getAlbumId());
         bottomPlay.setOnClickListener(v -> musicPlayer.playOrPause());
         bottomLinear.setOnClickListener(v -> {
             Intent intent = new Intent("MUSIC_PLAY_ACTIVITY");
@@ -90,17 +84,17 @@ public class BottomLayoutFragment extends Fragment implements onMusicListener {
         });
     }
 
-    @Override
-    public void onMusicCompletion() {
-        music = musicPlayer.getMusic();
-        MusicLoader.setBitmap(bottomBitmap, music.getAlbumId());
-        bottomTitle.setText(music.getTitle());
-        bottomArtist.setText(music.getArtist());
+    public void setType(int type) {
+        this.type = type;
     }
 
     @Override
-    public void onMusicLast() {
-        onMusicCompletion();
+    public void onMusicCompletion() {
+        music = musicPlayer.getMusic();
+        MusicLoader.setBitmap(getContext(), bottomBitmap, music.getAlbumId());
+        bottomTitle.setText(music.getTitle());
+        bottomArtist.setText(music.getArtist());
+        onMusicPlayOrPause();
     }
 
     @Override
