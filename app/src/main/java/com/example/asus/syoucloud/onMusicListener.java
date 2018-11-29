@@ -1,17 +1,11 @@
-package com.example.asus.syoucloud.musicManager;
+package com.example.asus.syoucloud;
 
 public interface onMusicListener {
     void onMusicCompletion();
 
-    void onMusicNext();
-
     void onMusicPlayOrPause();
 
     void onMusicStop();
-
-    default void onUpdateLyric() {
-
-    }
 
     default void onStopUpd() {
 

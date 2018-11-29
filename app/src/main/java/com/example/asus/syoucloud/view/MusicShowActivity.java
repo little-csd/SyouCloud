@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud;
+package com.example.asus.syoucloud.view;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -16,12 +16,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.asus.syoucloud.adapter.MixItem;
-import com.example.asus.syoucloud.adapter.MusicListAdapter;
-import com.example.asus.syoucloud.fragment.BottomLayoutFragment;
-import com.example.asus.syoucloud.musicManager.MusicInfo;
-import com.example.asus.syoucloud.musicManager.MusicLoader;
-import com.example.asus.syoucloud.musicManager.MusicService;
+import com.example.asus.syoucloud.bean.MixItem;
+import com.example.asus.syoucloud.R;
+import com.example.asus.syoucloud.bean.MusicInfo;
+import com.example.asus.syoucloud.util.MusicLoader;
+import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.RecyclerDivider;
 
@@ -43,12 +42,11 @@ public class MusicShowActivity extends AppCompatActivity
         public void onServiceConnected(ComponentName name, IBinder service) {
             musicPlayer = (MusicService.MusicPlayer) service;
             BottomLayoutFragment fragment = new BottomLayoutFragment();
-            fragment.setMusicPlayer(musicPlayer);
+//            fragment.setMusicPlayer(musicPlayer);
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.music_show_bottom, fragment)
                     .commit();
-            fragment.setType(2);
             initView();
         }
 

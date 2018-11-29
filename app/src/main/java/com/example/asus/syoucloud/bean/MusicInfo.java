@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.musicManager;
+package com.example.asus.syoucloud.bean;
 
 public class MusicInfo {
     private long id;
@@ -10,7 +10,7 @@ public class MusicInfo {
     private String artist;
     private String url;
 
-    MusicInfo(long id, long size, int duration, String title, String album, String artist,
+    public MusicInfo(long id, long size, int duration, String title, String album, String artist,
               String url, int albumId) {
         this.id = id;
         this.size = size;

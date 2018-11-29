@@ -9,6 +9,13 @@ public class Constant {
     public static final int DECORATION_PADDING = 160;
     public static final int ITEM_DECORATION = 0xffe3e3e3;
 
+    public static final int MAX_TYPE = 5;
+    public static final int OVERLAY_TYPE = 4;
+    public static final int MUSIC_PLAY_TYPE = 3;
+    public static final int BOTTOM_TYPE = 2;
+    public static final int LYRIC_TYPE = 1;
+    public static final int DISK_TYPE = 0;
+
     public static final String PLAY = "com.example.asus.syoucloud.NotificationReceiver.Play";
     public static final String NEXT = "com.example.asus.syoucloud.NotificationReceiver.Next";
     public static final String LAST = "com.example.asus.syoucloud.NotificationReceiver.Last";
@@ -18,6 +25,4 @@ public class Constant {
     public static final String BACKGROUND = "com.example.asus.syoucloud.NotificationReceiver.Background";
     public static final String FOREGROUND = "com.example.asus.syoucloud.NotificationReceiver.Foreground";
     public static final String HEADSET = "android.intent.action.HEADSET_PLUG";
-    public static final String DOWNLOAD = "com.example.asus.syoucloud.NotificationReceiver.Download";
-    public static final String DOWNLOADAPI = "http://geci.me/api/lyric/";
 }

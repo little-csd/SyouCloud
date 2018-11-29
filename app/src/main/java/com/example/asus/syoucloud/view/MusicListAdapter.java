@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.adapter;
+package com.example.asus.syoucloud.view;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.asus.syoucloud.R;
-import com.example.asus.syoucloud.musicManager.MusicInfo;
+import com.example.asus.syoucloud.bean.MusicInfo;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private List<MusicInfo> musicList;
     private onMusicClickListener listener;
 
-    public MusicListAdapter(List<MusicInfo> mList) {
+    MusicListAdapter(List<MusicInfo> mList) {
         musicList = mList;
     }
 

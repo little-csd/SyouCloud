@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.musicManager;
+package com.example.asus.syoucloud.util;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.asus.syoucloud.R;
+import com.example.asus.syoucloud.bean.MusicInfo;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;

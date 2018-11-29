@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.musicManager;
+package com.example.asus.syoucloud;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -13,7 +13,9 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
 
+import com.example.asus.syoucloud.bean.Lyric;
 import com.example.asus.syoucloud.util.Constant;
+import com.example.asus.syoucloud.util.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,7 @@ public class LyricView extends View {
     private int timePadding;
     private int timeTextPadding;
     private int timeTextHeight;
+
     private Runnable hideTimelineRunnable = new Runnable() {
         @Override
         public void run() {
@@ -173,7 +176,7 @@ public class LyricView extends View {
         int centerLine = getCenterLine(), centerY = getHeight() / 2;
         if (isShowTimeLine) {
             timePaint.setTextSize(30);
-            String time = MusicService.parseToString(lyricList.get(centerLine).getTime() / 1000);
+            String time = TimeUtil.parseToString(lyricList.get(centerLine).getTime() / 1000);
             canvas.drawText(time, timePadding, centerY + 10, timePaint);
             canvas.drawLine(timeTextPadding, centerY, getWidth() - timeTextPadding,
                     centerY, timePaint);

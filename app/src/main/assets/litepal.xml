@@ -1,8 +1,7 @@
 <litepal>
     <dbname value="MixList" />
-    <version value="3" />
+    <version value="2" />
     <list>
-        <mapping class="com.example.asus.syoucloud.adapter.MixItem" />
-        <mapping class="com.example.asus.syoucloud.musicManager.LrcText" />
+        <mapping class="com.example.asus.syoucloud.bean.MixItem" />
     </list>
 </litepal>

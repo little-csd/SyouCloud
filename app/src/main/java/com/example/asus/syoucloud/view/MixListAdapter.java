@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.adapter;
+package com.example.asus.syoucloud.view;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.MusicShowActivity;
+import com.example.asus.syoucloud.bean.MixItem;
 import com.example.asus.syoucloud.R;
 
 import org.litepal.LitePal;
@@ -26,7 +26,7 @@ public class MixListAdapter extends RecyclerView.Adapter<MixListAdapter.ViewHold
     private List<MixItem> mixList;
     private Context mContext;
 
-    public MixListAdapter(Context context) {
+    MixListAdapter(Context context) {
         mixList = LitePal.findAll(MixItem.class);
         if (mixList == null) mixList = new ArrayList<>();
         mContext = context;

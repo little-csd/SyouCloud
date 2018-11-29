@@ -2,17 +2,14 @@ package com.example.asus.syoucloud.util;
 
 import android.util.Log;
 
-import com.example.asus.syoucloud.musicManager.Lyric;
+import com.example.asus.syoucloud.bean.Lyric;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +19,19 @@ public class LrcHandle {
     private static final String TAG = "LrcHandle";
     private List<Lyric> lyricList = new ArrayList<>();
 
-    public void readLrcFromFile(String path) {
+    private static LrcHandle lrcHandle;
+
+    private LrcHandle(){
+
+    }
+
+    public static LrcHandle getInstance() {
+        if (lrcHandle == null) lrcHandle = new LrcHandle();
+        return lrcHandle;
+    }
+
+    public void readLRC(String path) {
+        lyricList.clear();
         File file = new File(path);
         try {
             FileInputStream inputStream = new FileInputStream(file);
@@ -47,49 +56,11 @@ public class LrcHandle {
             inputStreamReader.close();
             inputStream.close();
         } catch (FileNotFoundException e) {
-            Log.i(TAG, "readLrcFromFile: 没有歌词文件");
+            Log.i(TAG, "readLRC: 没有歌词文件");
         } catch (IOException e) {
-            Log.i(TAG, "readLrcFromFile: 歌词文件读取错误");
+            Log.i(TAG, "readLRC: 歌词文件读取错误");
         }
         Collections.sort(lyricList);
-    }
-
-    public void readLrcFromInternet(String path, DownloadCallback listener) {
-        new Thread(() -> {
-            HttpURLConnection connection = null;
-            try {
-                URL url = new URL(path);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setConnectTimeout(4000);
-                connection.setReadTimeout(4000);
-                connection.setDoInput(true);
-                InputStream in = connection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.contains("[ti:") || line.contains("[ar:") ||
-                            line.contains("[al:") || line.contains("[by:"))
-                        continue;
-                    String lyric = line, translate = null;
-                    while (lyric.contains("]")) {
-                        String ss = lyric.substring(lyric.indexOf("["), lyric.indexOf("]") + 1);
-                        lyric = lyric.replace(ss, "");
-                    }
-                    if (lyric.contains("/")) {
-                        translate = lyric.substring(lyric.indexOf("/") + 1).replace(" ", "");
-                        lyric = lyric.substring(0, lyric.indexOf("/")).replace(" ", "");
-                    }
-                    addTime(line, lyric, translate);
-                }
-                if (listener != null) listener.onFinish();
-            } catch (Exception e) {
-                e.printStackTrace();
-                if (listener != null) listener.onError();
-            } finally {
-                if (connection != null) connection.disconnect();
-            }
-        }).start();
     }
 
     public List<Lyric> getLyricList() {
@@ -113,11 +84,5 @@ public class LrcHandle {
             else s = "";
             timeRead(ss, lyric, translate);
         }
-    }
-
-    public interface DownloadCallback {
-        void onFinish();
-
-        void onError();
     }
 }

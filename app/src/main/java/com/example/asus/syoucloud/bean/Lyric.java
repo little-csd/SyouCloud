@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.musicManager;
+package com.example.asus.syoucloud.bean;
 
 import android.support.annotation.NonNull;
 

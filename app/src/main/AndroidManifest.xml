@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".MusicApplication"
@@ -15,7 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/SyoCloudTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MusicPlayActivity"
+            android:name=".view.MusicPlayActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="MUSIC_PLAY_ACTIVITY" />
@@ -32,9 +32,9 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".musicManager.MusicService" />
+        <service android:name=".MusicService" />
 
-        <activity android:name=".MusicShowActivity"
+        <activity android:name=".view.MusicShowActivity"
             android:label="Mix">
         </activity>
     </application>

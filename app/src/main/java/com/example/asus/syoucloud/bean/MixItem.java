@@ -1,6 +1,6 @@
-package com.example.asus.syoucloud.adapter;
+package com.example.asus.syoucloud.bean;
 
-import com.example.asus.syoucloud.musicManager.MusicInfo;
+import com.example.asus.syoucloud.bean.MusicInfo;
 
 import org.litepal.crud.LitePalSupport;
 

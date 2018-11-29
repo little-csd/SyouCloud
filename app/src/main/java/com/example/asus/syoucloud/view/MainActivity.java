@@ -1,15 +1,12 @@
-package com.example.asus.syoucloud;
+package com.example.asus.syoucloud.view;
 
 import android.Manifest;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -34,10 +31,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.adapter.MixItem;
-import com.example.asus.syoucloud.adapter.MixListAdapter;
-import com.example.asus.syoucloud.fragment.BottomLayoutFragment;
-import com.example.asus.syoucloud.musicManager.MusicService;
+import com.example.asus.syoucloud.R;
+import com.example.asus.syoucloud.bean.MixItem;
+import com.example.asus.syoucloud.util.ActivityUtils;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.RecyclerDivider;
 
@@ -46,28 +42,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private DrawerLayout mDrawerLayout;
-    private MusicService.MusicPlayer musicPlayer;
     private MixListAdapter adapter;
 
     private int mixId;
-
-    private ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            musicPlayer = (MusicService.MusicPlayer) service;
-            BottomLayoutFragment fragment = new BottomLayoutFragment();
-            fragment.setMusicPlayer(musicPlayer);
-            fragment.setType(1);
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.bottom_layout, fragment)
-                    .commit();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,18 +52,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         requestReadPermission();
 
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        mixId = pref.getInt("MixMax", 0);
-
         initToolbar();
         initView();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unbindService(connection);
-        musicPlayer.deleteBottomPlayListener(1);
     }
 
     @Override
@@ -95,11 +62,6 @@ public class MainActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addCategory(Intent.CATEGORY_HOME);
         startActivity(intent);
-    }
-
-    public void bindService() {
-        Intent bindIntent = new Intent(this, MusicService.class);
-        bindService(bindIntent, connection, BIND_AUTO_CREATE);
     }
 
     private void requestReadPermission() {
@@ -121,7 +83,8 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
-        bindService();
+        ActivityUtils.addFragmentToActivity(getSupportFragmentManager(),
+                BottomLayoutFragment.getInstance(), R.id.bottom_layout);
     }
 
     private void initToolbar() {
@@ -240,7 +203,8 @@ public class MainActivity extends AppCompatActivity {
                         finish();
                     }
                 }
-                bindService();
+                ActivityUtils.addFragmentToActivity(getSupportFragmentManager(),
+                        BottomLayoutFragment.getInstance(), R.id.bottom_layout);
                 break;
             default:
         }
