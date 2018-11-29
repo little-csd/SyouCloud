@@ -53,7 +53,6 @@ public class MusicService extends Service {
         super.onCreate();
         musicPlayer = new MusicPlayer();
 
-        //todo change it to async
         MusicLoader musicLoader = MusicLoader.getInstance(getContentResolver(), this);
         musicPlayer.setMusicList(musicLoader.getMusicList());
         musicPlayer.initMediaPlayer();
@@ -316,6 +315,24 @@ public class MusicService extends Service {
             notificationManager.notify(2, unlockNotification);
         }
 
+        public void lyricClick() {
+            isLyricClick = !isLyricClick;
+            if (isLyricClick) {
+                remoteViews.setTextColor(R.id.notification_lyric, Color.RED);
+                if (MusicApplication.getActiveActivity() == 0)
+                    overlayWindowPresenter.showLyric();
+            } else {
+                remoteViews.setTextColor(R.id.notification_lyric, Color.BLACK);
+                if (overlayWindowPresenter.isLock()) {
+                    overlayWindowPresenter.unLock();
+                    notificationManager.cancel(2);
+                }
+                if (MusicApplication.getActiveActivity() == 0)
+                    overlayWindowPresenter.removeLyric();
+            }
+            notificationManager.notify(1, notification);
+        }
+
         @Override
         public boolean onSeekTo(int time) {
             mediaPlayer.seekTo(time);
@@ -337,6 +354,9 @@ public class MusicService extends Service {
     }
 
     private class NotificationReceiver extends BroadcastReceiver {
+
+        private boolean hasPlug = false;
+
         @Override
         public void onReceive(Context context, Intent intent) {
             String actionCode = intent.getAction();
@@ -355,17 +375,7 @@ public class MusicService extends Service {
                     musicPlayer.cancelNotification();
                     break;
                 case Constant.LYRIC:
-                    isLyricClick = !isLyricClick;
-                    if (isLyricClick) {
-                        remoteViews.setTextColor(R.id.notification_lyric, Color.RED);
-                        if (MusicApplication.getActiveActivity() == 0)
-                            overlayWindowPresenter.showLyric();
-                    } else {
-                        remoteViews.setTextColor(R.id.notification_lyric, Color.BLACK);
-                        if (MusicApplication.getActiveActivity() == 0)
-                            overlayWindowPresenter.removeLyric();
-                    }
-                    notificationManager.notify(1, notification);
+                    musicPlayer.lyricClick();
                     break;
                 case Constant.BACKGROUND:
                     if (isLyricClick) overlayWindowPresenter.showLyric();
@@ -377,6 +387,10 @@ public class MusicService extends Service {
                     overlayWindowPresenter.unLock();
                     break;
                 case Constant.HEADSET:
+                    if (!hasPlug) {
+                        hasPlug = true;
+                        return;
+                    }
                     if (intent.getIntExtra("state", 0) == 0 && musicPlayer.isPlay)
                         musicPlayer.playOrPause();
                 default:

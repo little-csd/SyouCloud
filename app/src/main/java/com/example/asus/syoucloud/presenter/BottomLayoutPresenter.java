@@ -2,13 +2,13 @@ package com.example.asus.syoucloud.presenter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.base.BasePresenter;
 import com.example.asus.syoucloud.bean.MusicInfo;
 import com.example.asus.syoucloud.onMusicListener;
-import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.MusicLoader;
 import com.example.asus.syoucloud.view.MusicPlayActivity;
 
@@ -17,17 +17,19 @@ public class BottomLayoutPresenter extends BasePresenter<Contract.IBottomLayoutF
 
     private MusicService.MusicPlayer musicPlayer;
     private Context context;
+    private int type;
 
-    public BottomLayoutPresenter(Context context, MusicService.MusicPlayer musicPlayer) {
+    public BottomLayoutPresenter(Context context, MusicService.MusicPlayer musicPlayer, int type) {
         this.context = context;
         this.musicPlayer = musicPlayer;
-        musicPlayer.addListener(this, Constant.BOTTOM_TYPE);
+        musicPlayer.addListener(this, type);
+        this.type = type;
     }
 
     @Override
     public void detachView() {
         super.detachView();
-        musicPlayer.deleteListener(Constant.BOTTOM_TYPE);
+        musicPlayer.deleteListener(type);
     }
 
     @Override
@@ -36,6 +38,7 @@ public class BottomLayoutPresenter extends BasePresenter<Contract.IBottomLayoutF
         Contract.IBottomLayoutFragment fragment = mViewRef.get();
         fragment.setArtist(music.getArtist());
         fragment.setTitle(music.getTitle());
+        fragment.pause();
         MusicLoader.setBitmap(context, fragment.getIgvView(), music.getAlbumId());
     }
 

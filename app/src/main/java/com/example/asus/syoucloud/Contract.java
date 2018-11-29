@@ -120,4 +120,12 @@ public interface Contract {
 
         void lock();
     }
+
+    interface IMusicShowPresenter {
+
+    }
+
+    interface IMusicShowActivity {
+
+    }
 }

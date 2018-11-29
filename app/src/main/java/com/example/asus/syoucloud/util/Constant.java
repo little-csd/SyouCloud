@@ -9,10 +9,11 @@ public class Constant {
     public static final int DECORATION_PADDING = 160;
     public static final int ITEM_DECORATION = 0xffe3e3e3;
 
-    public static final int MAX_TYPE = 5;
-    public static final int OVERLAY_TYPE = 4;
-    public static final int MUSIC_PLAY_TYPE = 3;
-    public static final int BOTTOM_TYPE = 2;
+    public static final int MAX_TYPE = 6;
+    public static final int OVERLAY_TYPE = 5;
+    public static final int MUSIC_PLAY_TYPE = 4;
+    public static final int BOTTOM_SHOW = 3;
+    public static final int BOTTOM_MAIN = 2;
     public static final int LYRIC_TYPE = 1;
     public static final int DISK_TYPE = 0;
 

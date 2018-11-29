@@ -4,15 +4,15 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 
 public class ActivityUtils {
     public static void addFragmentToActivity(@NonNull FragmentManager fragmentManager,
                                              @NonNull Fragment fragment, int frameId) {
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-        if (fragment.isAdded()) transaction.detach(fragment);
-        transaction.add(frameId, fragment);
-        transaction.commit();
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .add(frameId, fragment)
+                .commit();
     }
 
     public static void changeFragmentInActivity(@NonNull FragmentManager fragmentManager,

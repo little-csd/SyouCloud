@@ -26,6 +26,7 @@ public class OverlayWindowPresenter
     private Handler handler = new Handler();
 
     private int line = -1;
+    private boolean isLyricShow = false;
     private boolean isLock = false;
 
     private Runnable updLyric = new Runnable() {
@@ -77,7 +78,7 @@ public class OverlayWindowPresenter
 
     @Override
     public void close() {
-        overlayWindowManager.removeLyric();
+        musicPlayer.lyricClick();
     }
 
     @Override
@@ -88,12 +89,16 @@ public class OverlayWindowPresenter
     }
 
     public void showLyric() {
+        if (isLyricShow) return;
+        isLyricShow = true;
         handler.post(updLyric);
         musicPlayer.addListener(this, Constant.OVERLAY_TYPE);
         overlayWindowManager.showLyric(musicPlayer.isPlay());
     }
 
     public void removeLyric() {
+        if (!isLyricShow) return;
+        isLyricShow = false;
         handler.removeCallbacks(updLyric);
         musicPlayer.deleteListener(Constant.OVERLAY_TYPE);
         overlayWindowManager.removeLyric();
@@ -108,6 +113,10 @@ public class OverlayWindowPresenter
     public void cancel() {
         overlayWindowManager.unLock();
         isLock = false;
+    }
+
+    public boolean isLock() {
+        return isLock;
     }
 
     @Override

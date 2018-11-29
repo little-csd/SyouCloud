@@ -33,8 +33,7 @@ public class BottomLayoutFragment extends BaseFragment<Contract.IBottomLayoutFra
         BottomLayoutPresenter> implements Contract.IBottomLayoutFragment {
 
     private static final String TAG = "BottomLayoutFragment";
-
-    private static BottomLayoutFragment fragment;
+    private int type;
 
     @BindView(R.id.bottom_bitmap)
     ImageView bottomBitmap;
@@ -57,7 +56,7 @@ public class BottomLayoutFragment extends BaseFragment<Contract.IBottomLayoutFra
             }
             Context context = getActivity().getApplicationContext();
             BottomLayoutPresenter presenter =
-                    new BottomLayoutPresenter(context, (MusicService.MusicPlayer) service);
+                    new BottomLayoutPresenter(context, (MusicService.MusicPlayer) service, type);
             presenter.attachView(BottomLayoutFragment.this);
             setPresenter(presenter);
             mPresenter.start();
@@ -67,11 +66,6 @@ public class BottomLayoutFragment extends BaseFragment<Contract.IBottomLayoutFra
         public void onServiceDisconnected(ComponentName name) {
         }
     };
-
-    public static BottomLayoutFragment getInstance() {
-        if (fragment == null) fragment = new BottomLayoutFragment();
-        return fragment;
-    }
 
     @Nullable
     @Override
@@ -85,6 +79,10 @@ public class BottomLayoutFragment extends BaseFragment<Contract.IBottomLayoutFra
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         bindService();
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public void bindService() {

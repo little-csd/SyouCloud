@@ -24,7 +24,7 @@ public class MusicPlayActivityPresenter extends BasePresenter<Contract.IMusicPla
         @Override
         public void run() {
             int progress = musicPlayer.getCurrentProgress() / 1000;
-            updateHandler.postDelayed(this, 500);
+            updateHandler.postDelayed(this, 300);
             mViewRef.get().update(progress);
         }
     };
