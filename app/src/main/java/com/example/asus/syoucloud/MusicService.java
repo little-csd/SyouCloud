@@ -21,9 +21,10 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.example.asus.syoucloud.bean.MusicInfo;
+import com.example.asus.syoucloud.data.DatabaseManager;
+import com.example.asus.syoucloud.util.BitmapHelper;
 import com.example.asus.syoucloud.presenter.OverlayWindowPresenter;
 import com.example.asus.syoucloud.util.Constant;
-import com.example.asus.syoucloud.util.MusicLoader;
 import com.example.asus.syoucloud.view.MusicPlayActivity;
 
 import java.io.IOException;
@@ -53,8 +54,7 @@ public class MusicService extends Service {
         super.onCreate();
         musicPlayer = new MusicPlayer();
 
-        MusicLoader musicLoader = MusicLoader.getInstance(getContentResolver(), this);
-        musicPlayer.setMusicList(musicLoader.getMusicList());
+        musicPlayer.setMusicList(DatabaseManager.getInstance().getMusicList());
         musicPlayer.initMediaPlayer();
         overlayWindowPresenter = new OverlayWindowPresenter(musicPlayer, getApplicationContext());
     }
@@ -76,7 +76,7 @@ public class MusicService extends Service {
         if (notificationReceiver != null) unregisterReceiver(notificationReceiver);
     }
 
-    public class MusicPlayer extends Binder implements onLyricSeekToListener {
+    public class MusicPlayer extends Binder {
         private static final String TAG = "MusicPlayer";
 
         private boolean isPlay = false;
@@ -85,7 +85,7 @@ public class MusicService extends Service {
         private int id;
         private int albumId;
         private List<MusicInfo> musicList;
-        private onMusicListener[] listeners = new onMusicListener[6];
+        private onMusicListener[] listeners = new onMusicListener[Constant.MAX_TYPE];
 
         private MusicPlayer() {
             mediaPlayer = new MediaPlayer();
@@ -202,7 +202,7 @@ public class MusicService extends Service {
 
             MusicInfo music = musicPlayer.getMusic();
             remoteViews = new RemoteViews(getPackageName(), R.layout.custom_notification);
-            remoteViews.setImageViewBitmap(R.id.notification_image, MusicLoader.getBitmap(
+            remoteViews.setImageViewBitmap(R.id.notification_image, BitmapHelper.getBitmap(
                     getApplicationContext(), music.getAlbumId(), 160, 110));
             remoteViews.setTextViewText(R.id.notification_title, music.getTitle());
             remoteViews.setTextViewText(R.id.notification_artist, music.getArtist());
@@ -264,7 +264,7 @@ public class MusicService extends Service {
 
         private void updateNotification() {
             MusicInfo music = getMusic();
-            remoteViews.setImageViewBitmap(R.id.notification_image, MusicLoader.getBitmap(
+            remoteViews.setImageViewBitmap(R.id.notification_image, BitmapHelper.getBitmap(
                     getApplicationContext(), music.getAlbumId(), 160, 110));
             remoteViews.setTextViewText(R.id.notification_title, music.getTitle());
             remoteViews.setTextViewText(R.id.notification_artist, music.getArtist());
@@ -331,13 +331,6 @@ public class MusicService extends Service {
                     overlayWindowPresenter.removeLyric();
             }
             notificationManager.notify(1, notification);
-        }
-
-        @Override
-        public boolean onSeekTo(int time) {
-            mediaPlayer.seekTo(time);
-            if (!isPlay) playOrPause();
-            return true;
         }
 
         public void changeAlbum(int mAlbumId, int position, List<MusicInfo> mList) {

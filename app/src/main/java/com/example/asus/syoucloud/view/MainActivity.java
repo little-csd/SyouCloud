@@ -1,9 +1,7 @@
 package com.example.asus.syoucloud.view;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -23,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.bean.MixItem;
+import com.example.asus.syoucloud.data.DatabaseManager;
 import com.example.asus.syoucloud.util.ActivityUtils;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.RecyclerDivider;
@@ -43,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
         fragment.setType(Constant.BOTTOM_MAIN);
         ActivityUtils.addFragmentToActivity(getSupportFragmentManager(),
                 fragment, R.id.bottom_layout);
+
+        mixId = DatabaseManager.getInstance().getMixMax();
+
         initToolbar();
         initView();
     }
@@ -119,17 +121,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addMix(String title, String password) {
-        MixItem item = new MixItem();
-        item.setTitle(title);
-        item.setPassword(password);
-        item.setAlbumId(mixId++);
-        item.save();
-        adapter.add(item);
-
-        SharedPreferences.Editor editor =
-                PreferenceManager.getDefaultSharedPreferences(this).edit();
-        editor.putInt("MixMax", mixId);
-        editor.apply();
+        MixItem mixItem = new MixItem(mixId++, title, password);
+        DatabaseManager.getInstance().addMixItem(mixItem);
+        adapter.notifyItemInserted(mixId);
     }
 
     @Override

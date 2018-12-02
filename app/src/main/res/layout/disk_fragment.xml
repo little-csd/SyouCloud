@@ -20,7 +20,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="center_horizontal"
-        android:src="@drawable/disk_pointer_circle"/>
+        android:src="@drawable/disk_pointer_circle" />
 
     <ImageView
         android:id="@+id/music_play_pointer"
@@ -29,4 +29,24 @@
         android:layout_gravity="center_horizontal"
         android:src="@drawable/disk_pointer" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+
+        <ImageView
+            android:id="@+id/disk_download_lyric"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/disk_download_lyric_icon" />
+
+        <ImageView
+            android:id="@+id/disk_add_album"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:layout_toEndOf="@id/disk_download_lyric"
+            android:src="@drawable/disk_add_album_icon" />
+    </RelativeLayout>
 </FrameLayout>

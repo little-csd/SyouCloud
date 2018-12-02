@@ -7,8 +7,6 @@ import android.os.Bundle;
 
 import com.example.asus.syoucloud.util.Constant;
 
-import org.litepal.LitePal;
-
 public class MusicApplication extends Application {
 
     private static int activeActivity = 0;
@@ -20,7 +18,6 @@ public class MusicApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LitePal.initialize(this);
 
         Intent backIntent = new Intent(Constant.BACKGROUND);
         Intent foreIntent = new Intent(Constant.FOREGROUND);

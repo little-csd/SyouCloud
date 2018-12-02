@@ -1,7 +1,0 @@
-<litepal>
-    <dbname value="MixList" />
-    <version value="2" />
-    <list>
-        <mapping class="com.example.asus.syoucloud.bean.MixItem" />
-    </list>
-</litepal>

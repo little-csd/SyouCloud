@@ -3,7 +3,7 @@ package com.example.asus.syoucloud;
 import android.content.Context;
 import android.widget.ImageView;
 
-import com.example.asus.syoucloud.bean.Lyric;
+import com.example.asus.syoucloud.bean.LyricItem;
 import com.example.asus.syoucloud.bean.MusicInfo;
 
 import java.util.List;
@@ -31,6 +31,10 @@ public interface Contract {
 
     interface IDiskLayoutPresenter {
         void start();
+
+        void noticeAdd();
+
+        void addToDatabase(int albumId);
     }
 
     interface IDiskLayoutFragment {
@@ -48,7 +52,9 @@ public interface Contract {
     interface ILyricFragment {
         void seekTo(int time);
 
-        void setLyricList(List<Lyric> list);
+        void setLyricList(List<LyricItem> list);
+
+        void mkToast(int type);
     }
 
     interface IMusicPlayActivityPresenter {
@@ -126,6 +132,6 @@ public interface Contract {
     }
 
     interface IMusicShowActivity {
-
+        void add(MusicInfo music);
     }
 }

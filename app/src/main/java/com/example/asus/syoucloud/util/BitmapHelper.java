@@ -3,58 +3,34 @@ package com.example.asus.syoucloud.util;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.asus.syoucloud.R;
-import com.example.asus.syoucloud.bean.MusicInfo;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
-public class MusicLoader {
+public class BitmapHelper {
 
-    private static final String TAG = "MusicLoader";
+    private static final String TAG = "BitmapHelper";
     private static final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-
-    private static MusicLoader musicLoader;
-    private static ContentResolver contentResolver;
     private static float scale;
-    private final Uri contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-    private List<MusicInfo> musicList;
-    private String[] projection = {
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.SIZE,
-            MediaStore.Audio.Media.ALBUM_ID
-    };
+    private static ContentResolver contentResolver;
 
-    private MusicLoader() {
-        musicList = new ArrayList<>();
-        reSearch();
+    private BitmapHelper() {
+
     }
 
-    public static MusicLoader getInstance(ContentResolver mContentResolver, Context context) {
-        if (musicLoader == null) {
-            contentResolver = mContentResolver;
-            musicLoader = new MusicLoader();
-            scale = context.getResources().getDisplayMetrics().density;
-        }
-        return musicLoader;
+    public static void init(float scale, ContentResolver contentResolver) {
+        BitmapHelper.scale = scale;
+        BitmapHelper.contentResolver = contentResolver;
     }
 
     public static void setBitmap(Context context, @NonNull ImageView igv, int albumId) {
@@ -130,40 +106,5 @@ public class MusicLoader {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(r);
         } else r.run();
-    }
-
-    private void reSearch() {
-        Cursor cursor = contentResolver.query(contentUri, projection, null,
-                null, null);
-        musicList.clear();
-        if (cursor == null) Log.i(TAG, "MusicLoader: cursor = null");
-        else if (!cursor.moveToFirst()) Log.i(TAG, "MusicLoader: cursor moveToFirst error");
-        else {
-            int idCol = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
-            int titleCol = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-            int urlCol = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-            int albumCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
-            int artistCol = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-            int durationCol = cursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
-            int sizeCol = cursor.getColumnIndex(MediaStore.Audio.Media.SIZE);
-            int albumIdCol = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
-            do {
-                long id = cursor.getLong(idCol);
-                long size = cursor.getLong(sizeCol);
-                int duration = cursor.getInt(durationCol);
-                int albumId = cursor.getInt(albumIdCol);
-                String title = cursor.getString(titleCol);
-                String album = cursor.getString(albumCol);
-                String artist = cursor.getString(artistCol);
-                String url = cursor.getString(urlCol);
-                MusicInfo musicInfo = new MusicInfo(id, size, duration, title, album, artist, url, albumId);
-                musicList.add(musicInfo);
-            } while (cursor.moveToNext());
-            cursor.close();
-        }
-    }
-
-    public List<MusicInfo> getMusicList() {
-        return musicList;
     }
 }

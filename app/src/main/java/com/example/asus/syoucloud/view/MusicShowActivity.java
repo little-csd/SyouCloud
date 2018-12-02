@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -19,15 +20,12 @@ import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.base.BaseActivity;
-import com.example.asus.syoucloud.bean.MixItem;
 import com.example.asus.syoucloud.bean.MusicInfo;
+import com.example.asus.syoucloud.data.DatabaseManager;
 import com.example.asus.syoucloud.presenter.MusicShowPresenter;
 import com.example.asus.syoucloud.util.ActivityUtils;
 import com.example.asus.syoucloud.util.Constant;
-import com.example.asus.syoucloud.util.MusicLoader;
 import com.example.asus.syoucloud.util.RecyclerDivider;
-
-import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +33,7 @@ import java.util.List;
 public class MusicShowActivity extends BaseActivity<Contract.IMusicShowActivity, MusicShowPresenter>
         implements Contract.IMusicShowActivity {
 
+    private MusicListAdapter adapter;
     private Toolbar toolbar;
     private int albumId;
 
@@ -102,7 +101,7 @@ public class MusicShowActivity extends BaseActivity<Contract.IMusicShowActivity,
                 int toolBarHeight = toolbar.getMeasuredHeight();
                 if (layoutManager.findFirstVisibleItemPosition() == -1) return;
 
-                if (offset >= toolBarHeight * 2.5) {
+                if (offset >= toolBarHeight * 2.5 || layoutManager.findFirstVisibleItemPosition() > 0) {
                     mDrawable.setAlpha(255);
                     toolbar.setBackground(mDrawable);
                 } else if (offset >= toolBarHeight) {
@@ -114,20 +113,20 @@ public class MusicShowActivity extends BaseActivity<Contract.IMusicShowActivity,
 
         new Thread(() -> {
             List<MusicInfo> musicList;
-            if (albumId == -1) {
-                musicList = MusicLoader.getInstance(getContentResolver(),
-                        getApplicationContext()).getMusicList();
-            } else {
-                musicList = LitePal
-                        .where("albumId=?", String.valueOf(albumId))
-                        .findFirst(MixItem.class)
-                        .getMusicList();
+            if (albumId == -1) musicList = DatabaseManager.getInstance().getMusicList();
+            else {
+                musicList = DatabaseManager.getInstance().getMusicList(albumId);
                 if (musicList == null) musicList = new ArrayList<>();
             }
-            MusicListAdapter adapter = new MusicListAdapter(musicList);
+            adapter = new MusicListAdapter(musicList);
             adapter.setOnMusicClickListener(mPresenter);
             recyclerView.setAdapter(adapter);
         }).start();
+    }
+
+    @Override
+    public void add(MusicInfo music) {
+        adapter.add(music);
     }
 
     @Override

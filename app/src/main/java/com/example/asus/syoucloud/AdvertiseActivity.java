@@ -17,7 +17,8 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.util.MusicLoader;
+import com.example.asus.syoucloud.data.DatabaseManager;
+import com.example.asus.syoucloud.util.BitmapHelper;
 import com.example.asus.syoucloud.view.MainActivity;
 
 public class AdvertiseActivity extends AppCompatActivity {
@@ -51,9 +52,11 @@ public class AdvertiseActivity extends AppCompatActivity {
         requestReadPermission();
     }
 
+    // add prepare operation here
     private void start() {
         handler.post(run);
-        MusicLoader.getInstance(getContentResolver(), this);
+        new Thread(() -> DatabaseManager.getInstance().initDatabase(getApplicationContext())).start();
+        BitmapHelper.init(getResources().getDisplayMetrics().density, getContentResolver());
     }
 
     private void requestReadPermission() {

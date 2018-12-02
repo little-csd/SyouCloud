@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.asus.syoucloud.Contract;
+import com.example.asus.syoucloud.LyricView;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.base.BaseActivity;
@@ -54,8 +55,10 @@ public class MusicPlayActivity extends BaseActivity<Contract.IMusicPlayActivity,
     ImageView musicPlayStyle;
     @BindView(R.id.music_play_list)
     ImageView musicPlayList;
+
     private LyricFragment lyricFragment;
     private DiskFragment diskFragment;
+
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {

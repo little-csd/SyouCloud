@@ -5,15 +5,18 @@ import android.content.Context;
 import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.base.BasePresenter;
+import com.example.asus.syoucloud.bean.MusicInfo;
+import com.example.asus.syoucloud.data.DatabaseManager;
+import com.example.asus.syoucloud.util.BitmapHelper;
 import com.example.asus.syoucloud.onMusicListener;
 import com.example.asus.syoucloud.util.Constant;
-import com.example.asus.syoucloud.util.MusicLoader;
 
 public class DiskFragmentPresenter extends BasePresenter<Contract.IDiskLayoutFragment>
         implements Contract.IDiskLayoutPresenter, onMusicListener {
 
     private Context context;
     private MusicService.MusicPlayer musicPlayer;
+    private MusicInfo music;
 
     public DiskFragmentPresenter(Context context, MusicService.MusicPlayer musicPlayer) {
         this.context = context;
@@ -35,8 +38,19 @@ public class DiskFragmentPresenter extends BasePresenter<Contract.IDiskLayoutFra
     }
 
     @Override
+    public void noticeAdd() {
+        music = musicPlayer.getMusic();
+    }
+
+    @Override
+    public void addToDatabase(int albumId) {
+        if (music == null) return;
+        DatabaseManager.getInstance().addMusicToMix(music, albumId);
+    }
+
+    @Override
     public void onMusicCompletion() {
-        MusicLoader.setBitmap(context, mViewRef.get().getIgvView(), musicPlayer.getMusic().getAlbumId());
+        BitmapHelper.setBitmap(context, mViewRef.get().getIgvView(), musicPlayer.getMusic().getAlbumId());
         mViewRef.get().startAnim();
     }
 

@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
 
-import com.example.asus.syoucloud.bean.Lyric;
+import com.example.asus.syoucloud.bean.LyricItem;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.TimeUtil;
 
@@ -24,13 +24,13 @@ public class LyricView extends View {
     public static final int ADJUST_CENTER = 200;
     public static final int TIMELINE_KEEP_TIME = 2000;
 
-    private List<Lyric> lyricList = new ArrayList<>();
+    private List<LyricItem> lyricList = new ArrayList<>();
     private Paint textPaint;
     private Paint timePaint;
     private ValueAnimator mAnimator;
     private GestureDetector mGestureDetector;
     private Scroller mScroller;
-    private onLyricSeekToListener seekToListener;
+    private onLyricListener listener;
     private float mOffset;
     private float mSpacing;
     private boolean isShowTimeLine;
@@ -95,9 +95,13 @@ public class LyricView extends View {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             if (hasLyric() && isShowTimeLine && contain((int) e.getX(), (int) e.getY())) {
+                if (lyricList.size() == 1) {
+                    listener.onDownloadLyric();
+                    return true;
+                }
                 int centerLine = getCenterLine();
                 int time = lyricList.get(centerLine).getTime();
-                if (seekToListener.onSeekTo(time)) {
+                if (listener.onSeekTo(time)) {
                     isShowTimeLine = false;
                     removeCallbacks(hideTimelineRunnable);
                     mCurrentLine = centerLine;
@@ -196,7 +200,7 @@ public class LyricView extends View {
         }
     }
 
-    public void drawText(Canvas canvas, Lyric lyric, float y) {
+    public void drawText(Canvas canvas, LyricItem lyric, float y) {
         canvas.drawText(lyric.getText(), getWidth() / 2, y, textPaint);
         if (lyric.getTranslate() != null) {
             y += Constant.DT;
@@ -204,7 +208,7 @@ public class LyricView extends View {
         }
     }
 
-    public void setLyricList(List<Lyric> lyricList) {
+    public void setLyricList(List<LyricItem> lyricList) {
         this.lyricList = lyricList;
         mCurrentLine = 0;
         mOffset = getHeight() / 2;
@@ -215,8 +219,8 @@ public class LyricView extends View {
         invalidate();
     }
 
-    public void setSeekToListener(onLyricSeekToListener seekToListener) {
-        this.seekToListener = seekToListener;
+    public void setSeekToListener(onLyricListener listener) {
+        this.listener = listener;
     }
 
     public boolean hasLyric() {
@@ -323,5 +327,11 @@ public class LyricView extends View {
     protected void onDetachedFromWindow() {
         removeCallbacks(hideTimelineRunnable);
         super.onDetachedFromWindow();
+    }
+
+    public interface onLyricListener {
+        boolean onSeekTo(int time);
+
+        void onDownloadLyric();
     }
 }

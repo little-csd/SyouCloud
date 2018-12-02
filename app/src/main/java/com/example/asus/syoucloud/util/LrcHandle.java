@@ -2,7 +2,7 @@ package com.example.asus.syoucloud.util;
 
 import android.util.Log;
 
-import com.example.asus.syoucloud.bean.Lyric;
+import com.example.asus.syoucloud.bean.LyricItem;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,7 +17,7 @@ import java.util.List;
 public class LrcHandle {
 
     private static final String TAG = "LrcHandle";
-    private List<Lyric> lyricList = new ArrayList<>();
+    private List<LyricItem> lyricList = new ArrayList<>();
 
     private static LrcHandle lrcHandle;
 
@@ -63,7 +63,7 @@ public class LrcHandle {
         Collections.sort(lyricList);
     }
 
-    public List<Lyric> getLyricList() {
+    public List<LyricItem> getLyricList() {
         return lyricList;
     }
 
@@ -74,7 +74,7 @@ public class LrcHandle {
         int second = Integer.parseInt(time[1]);
         int millSecond = Integer.parseInt(time[2]);
         int all = millSecond * 10 + second * 1000 + minute * 1000 * 60;
-        lyricList.add(new Lyric(all, lyric, translate));
+        lyricList.add(new LyricItem(all, lyric, translate));
     }
 
     private void addTime(String s, String lyric, String translate) {

@@ -13,10 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.bean.MixItem;
 import com.example.asus.syoucloud.R;
-
-import org.litepal.LitePal;
+import com.example.asus.syoucloud.bean.MixItem;
+import com.example.asus.syoucloud.data.DatabaseManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +25,8 @@ public class MixListAdapter extends RecyclerView.Adapter<MixListAdapter.ViewHold
     private List<MixItem> mixList;
     private Context mContext;
 
-    MixListAdapter(Context context) {
-        mixList = LitePal.findAll(MixItem.class);
+    public MixListAdapter(Context context) {
+        mixList = DatabaseManager.getInstance().getMixList();
         if (mixList == null) mixList = new ArrayList<>();
         mContext = context;
     }
@@ -40,10 +39,10 @@ public class MixListAdapter extends RecyclerView.Adapter<MixListAdapter.ViewHold
         final ViewHolder holder = new ViewHolder(view);
         holder.title.setOnClickListener(v -> {
             int position = holder.getAdapterPosition();
-            int albumId = mixList.get(position).getAlbumId();
+            int mixId = (int) mixList.get(position).getId();
             String password = mixList.get(position).getPassword();
-            if (password.equals("")) enterMix(albumId);
-            else mkPasswordDialog(password, albumId);
+            if (password.equals("")) enterMix(mixId);
+            else mkPasswordDialog(password, mixId);
         });
         return holder;
     }

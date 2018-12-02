@@ -70,6 +70,11 @@ public class MusicListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         this.listener = listener;
     }
 
+    public void add(MusicInfo music) {
+        musicList.add(music);
+        notifyItemInserted(musicList.size() + 1);
+    }
+
     public interface onMusicClickListener {
         void onMusicClick(int position, List<MusicInfo> mList);
     }

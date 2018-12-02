@@ -4,6 +4,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
 public abstract class BasePresenter<T> {
+
     protected Reference<T> mViewRef;
 
     public void attachView(T view) {

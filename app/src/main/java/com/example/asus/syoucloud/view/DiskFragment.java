@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +22,13 @@ import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.base.BaseFragment;
+import com.example.asus.syoucloud.data.DatabaseManager;
 import com.example.asus.syoucloud.presenter.DiskFragmentPresenter;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -29,9 +36,15 @@ public class DiskFragment extends BaseFragment<Contract.IDiskLayoutFragment, Dis
         implements Contract.IDiskLayoutFragment {
 
     private static final String TAG = "DiskFragment";
+    @BindView(R.id.album_image)
+    ImageView albumImage;
+    @BindView(R.id.disk_download_lyric)
+    ImageView diskDownloadLyric;
+    @BindView(R.id.disk_add_album)
+    ImageView diskAddAlbum;
+    Unbinder unbinder;
 
     private ObjectAnimator albumAnim;
-    private ImageView albumImage;
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -40,7 +53,7 @@ public class DiskFragment extends BaseFragment<Contract.IDiskLayoutFragment, Dis
                 Log.i(TAG, "onServiceConnected: getActivity error");
                 return;
             }
-            Context context = getActivity().getApplicationContext();
+            Context context = getActivity();
             DiskFragmentPresenter presenter =
                     new DiskFragmentPresenter(context, (MusicService.MusicPlayer) service);
             presenter.attachView(DiskFragment.this);
@@ -57,7 +70,7 @@ public class DiskFragment extends BaseFragment<Contract.IDiskLayoutFragment, Dis
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.disk_fragment, container, false);
-        albumImage = view.findViewById(R.id.album_image);
+        unbinder = ButterKnife.bind(this, view);
         initAnim();
         bindService();
         return view;
@@ -69,6 +82,7 @@ public class DiskFragment extends BaseFragment<Contract.IDiskLayoutFragment, Dis
         albumAnim.cancel();
         if (getActivity() != null)
             getActivity().getApplicationContext().unbindService(connection);
+        unbinder.unbind();
     }
 
     public void bindService() {
@@ -102,5 +116,31 @@ public class DiskFragment extends BaseFragment<Contract.IDiskLayoutFragment, Dis
     @Override
     public void pauseAnim() {
         albumAnim.pause();
+    }
+
+    public void mkAddToAlbumDialog() {
+        Context context = getContext();
+        if (context == null) {
+            Log.i(TAG, "mkAddToAlbumDialog: get context fail");
+            return;
+        }
+        mPresenter.noticeAdd();
+        String[] items = DatabaseManager.getInstance().getMixTitleItems();
+        new AlertDialog.Builder(context)
+                .setTitle("Save to mix")
+                .setItems(items, (dialog, which) -> mPresenter.addToDatabase(which))
+                .show();
+    }
+
+    @OnClick({R.id.disk_download_lyric, R.id.disk_add_album})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.disk_download_lyric:
+
+                break;
+            case R.id.disk_add_album:
+                mkAddToAlbumDialog();
+                break;
+        }
     }
 }

@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
-import com.example.asus.syoucloud.bean.Lyric;
+import com.example.asus.syoucloud.bean.LyricItem;
 import com.example.asus.syoucloud.onMusicListener;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.LrcHandle;
@@ -22,7 +22,7 @@ public class OverlayWindowPresenter
     private MusicService.MusicPlayer musicPlayer;
     private Contract.IOverlayWindowManager overlayWindowManager;
     private LrcHandle lrcHandle;
-    private List<Lyric> lyricList;
+    private List<LyricItem> lyricList;
     private Handler handler = new Handler();
 
     private int line = -1;
@@ -39,7 +39,7 @@ public class OverlayWindowPresenter
                 Log.i(TAG, "update lyric error");
                 return;
             }
-            Lyric lyric = lyricList.get(mLine);
+            LyricItem lyric = lyricList.get(mLine);
             String text = lyric.getText();
             if (lyric.getTranslate() != null)
                 text = text + "\n" + lyric.getTranslate();
@@ -54,6 +54,7 @@ public class OverlayWindowPresenter
         overlayWindowManager.setPresenter(this);
         overlayWindowManager.initData(context);
 
+        // TODO: 2018/11/30 add lyric here
         new Thread(() -> {
             lrcHandle = LrcHandle.getInstance();
             lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");

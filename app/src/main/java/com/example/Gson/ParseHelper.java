@@ -1,0 +1,70 @@
+package com.example.Gson;
+
+import com.example.asus.syoucloud.bean.LyricItem;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class ParseHelper {
+
+    private static List<LyricItem> lyric;
+
+    public static String parseLyricInfo(String data) {
+        List<LyricResult> list = new Gson().fromJson(data, LyricInfo.class).getResult();
+        if (list == null || list.isEmpty()) return "";
+        else return list.get(0).getLrc();
+    }
+
+    public static List<LyricItem> parseLyric(String data) {
+        lyric = new ArrayList<>();
+        String[] list = data.split("\r?\n");
+        for (String mList : list) {
+            if (mList.contains("ti:") || mList.contains("ar:") || mList.contains("al:") ||
+                    mList.contains("by:") || mList.contains("Offset") || !mList.contains("]"))
+                continue;
+            String text = mList, translate = null;
+            text = text.replace("〖", "[").replace("〗", "]");
+            while (text.contains("]")) {
+                String ss = text.substring(text.indexOf("["), text.indexOf("]") + 1);
+                text = text.replace(ss, "");
+            }
+            if (text.contains("/")) {
+                translate = text.substring(text.indexOf("/") + 1);
+                text = text.substring(0, text.indexOf("/"));
+            } else if (text.contains("\\")) {
+                translate = text.substring(text.indexOf("\\") + 1);
+                text = text.substring(0, text.indexOf("\\"));
+            }
+            if (text.equals("")) continue;
+            addTime(mList, text, translate);
+        }
+        Collections.sort(lyric);
+        return lyric;
+    }
+
+    private static void timeRead(String s, String text, String translate) {
+        s = s.replace(".", ":");
+        String time[] = s.split(":");
+        int minute, second, millSecond;
+        if (time.length > 0) minute = Integer.parseInt(time[0]);
+        else minute = 0;
+        if (time.length > 1) second = Integer.parseInt(time[1]);
+        else second = 0;
+        if (time.length > 2) millSecond = Integer.parseInt(time[2]);
+        else millSecond = 0;
+        int all = millSecond * 10 + second * 1000 + minute * 1000 * 60;
+        if (all < 0) return;
+        lyric.add(new LyricItem(all, text, translate));
+    }
+
+    private static void addTime(String s, String text, String translate) {
+        while (s.contains("]")) {
+            String ss = s.substring(s.indexOf("[") + 1, s.indexOf("]"));
+            if (s.length() > 10) s = s.substring(10, s.length());
+            else s = "";
+            timeRead(ss, text, translate);
+        }
+    }
+}
