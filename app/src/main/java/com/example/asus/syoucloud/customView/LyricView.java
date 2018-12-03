@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud;
+package com.example.asus.syoucloud.customView;
 
 import android.animation.ValueAnimator;
 import android.content.Context;

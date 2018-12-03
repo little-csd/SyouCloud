@@ -16,13 +16,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/SyoCloudTheme">
-        <activity android:name=".view.MainActivity" />
-
+        <activity android:name=".MainActivity" />
         <activity
-            android:name=".view.MusicPlayActivity"
+            android:name=".musicPlay.MusicPlayActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="MUSIC_PLAY_ACTIVITY" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -30,9 +30,8 @@
         <service android:name=".MusicService" />
 
         <activity
-            android:name=".view.MusicShowActivity"
+            android:name=".musicShow.MusicShowActivity"
             android:label="Mix" />
-
         <activity android:name=".AdvertiseActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,7 +39,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity android:name=".tomatoClock.TomatoClockActivity"
+            android:launchMode="singleTop"
+            android:label="Tomato Clock" />
     </application>
 
 </manifest>

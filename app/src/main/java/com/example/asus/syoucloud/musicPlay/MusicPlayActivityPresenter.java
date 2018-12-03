@@ -1,8 +1,7 @@
-package com.example.asus.syoucloud.presenter;
+package com.example.asus.syoucloud.musicPlay;
 
 import android.os.Handler;
 
-import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.base.BasePresenter;
 import com.example.asus.syoucloud.onMusicListener;
@@ -12,8 +11,8 @@ import static com.example.asus.syoucloud.util.Constant.LIST_LOOP;
 import static com.example.asus.syoucloud.util.Constant.SHUFFLE;
 import static com.example.asus.syoucloud.util.Constant.SINGLE_LOOP;
 
-public class MusicPlayActivityPresenter extends BasePresenter<Contract.IMusicPlayActivity>
-        implements Contract.IMusicPlayActivityPresenter, onMusicListener {
+public class MusicPlayActivityPresenter extends BasePresenter<musicPlayContract.IMusicPlayActivity>
+        implements musicPlayContract.IMusicPlayActivityPresenter, onMusicListener {
 
     private MusicService.MusicPlayer musicPlayer;
     private Handler updateHandler = new Handler();

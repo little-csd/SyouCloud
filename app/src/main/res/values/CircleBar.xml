@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CircleBar">
+        <attr name="firstColor" format="color"/>
+        <attr name="secondColor" format="color" />
+        <attr name="circleWidth" format="dimension" />
+        <attr name="maxProgress" format="integer" />
+    </declare-styleable>
+</resources>

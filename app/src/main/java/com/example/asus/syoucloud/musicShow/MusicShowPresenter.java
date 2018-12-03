@@ -1,17 +1,15 @@
-package com.example.asus.syoucloud.presenter;
+package com.example.asus.syoucloud.musicShow;
 
-import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.base.BasePresenter;
 import com.example.asus.syoucloud.bean.MusicInfo;
-import com.example.asus.syoucloud.data.DatabaseManager;
-import com.example.asus.syoucloud.view.MusicListAdapter;
+import com.example.asus.syoucloud.data.DataRepository;
 
 import java.util.List;
 
-public class MusicShowPresenter extends BasePresenter<Contract.IMusicShowActivity>
-        implements MusicListAdapter.onMusicClickListener, Contract.IMusicShowPresenter,
-            DatabaseManager.DataChangeListener {
+public class MusicShowPresenter extends BasePresenter<musicShowContract.IMusicShowActivity>
+        implements MusicListAdapter.onMusicClickListener, musicShowContract.IMusicShowPresenter,
+        DataRepository.DataChangeListener {
 
     private int albumId;
     private MusicService.MusicPlayer musicPlayer;
@@ -19,13 +17,13 @@ public class MusicShowPresenter extends BasePresenter<Contract.IMusicShowActivit
     public void initData(MusicService.MusicPlayer musicPlayer, int albumId) {
         this.musicPlayer = musicPlayer;
         this.albumId = albumId;
-        DatabaseManager.getInstance().addDataChangeListener(this);
+        DataRepository.getInstance().addDataChangeListener(this);
     }
 
     @Override
     public void detachView() {
         super.detachView();
-        DatabaseManager.getInstance().removeDataChangeListener();
+        DataRepository.getInstance().removeDataChangeListener();
     }
 
     @Override

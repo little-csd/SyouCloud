@@ -1,24 +1,23 @@
-package com.example.asus.syoucloud.presenter;
+package com.example.asus.syoucloud.bottomLayout;
 
 import android.content.Context;
 import android.content.Intent;
 
-import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.base.BasePresenter;
 import com.example.asus.syoucloud.bean.MusicInfo;
-import com.example.asus.syoucloud.util.BitmapHelper;
+import com.example.asus.syoucloud.musicPlay.MusicPlayActivity;
 import com.example.asus.syoucloud.onMusicListener;
-import com.example.asus.syoucloud.view.MusicPlayActivity;
+import com.example.asus.syoucloud.util.BitmapHelper;
 
-public class BottomLayoutPresenter extends BasePresenter<Contract.IBottomLayoutFragment>
-        implements Contract.IBottomLayoutPresenter, onMusicListener {
+public class BottomLayoutPresenter extends BasePresenter<bottomLayoutContract.IBottomLayoutFragment>
+        implements bottomLayoutContract.IBottomLayoutPresenter, onMusicListener {
 
     private MusicService.MusicPlayer musicPlayer;
     private Context context;
     private int type;
 
-    public BottomLayoutPresenter(Context context, MusicService.MusicPlayer musicPlayer, int type) {
+    BottomLayoutPresenter(Context context, MusicService.MusicPlayer musicPlayer, int type) {
         this.context = context;
         this.musicPlayer = musicPlayer;
         musicPlayer.addListener(this, type);
@@ -34,7 +33,7 @@ public class BottomLayoutPresenter extends BasePresenter<Contract.IBottomLayoutF
     @Override
     public void onMusicCompletion() {
         MusicInfo music = musicPlayer.getMusic();
-        Contract.IBottomLayoutFragment fragment = mViewRef.get();
+        bottomLayoutContract.IBottomLayoutFragment fragment = mViewRef.get();
         fragment.setArtist(music.getArtist());
         fragment.setTitle(music.getTitle());
         fragment.pause();

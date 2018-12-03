@@ -17,9 +17,8 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.data.DatabaseManager;
+import com.example.asus.syoucloud.data.DataRepository;
 import com.example.asus.syoucloud.util.BitmapHelper;
-import com.example.asus.syoucloud.view.MainActivity;
 
 public class AdvertiseActivity extends AppCompatActivity {
 
@@ -55,7 +54,7 @@ public class AdvertiseActivity extends AppCompatActivity {
     // add prepare operation here
     private void start() {
         handler.post(run);
-        new Thread(() -> DatabaseManager.getInstance().initDatabase(getApplicationContext())).start();
+        new Thread(() -> DataRepository.getInstance().initDatabase(getApplicationContext())).start();
         BitmapHelper.init(getResources().getDisplayMetrics().density, getContentResolver());
     }
 

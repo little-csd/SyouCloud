@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.view;
+package com.example.asus.syoucloud.musicShow;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;

@@ -31,6 +31,7 @@ public class Constant {
     public static final String UNLOCK = "com.example.asus.syoucloud.NotificationReceiver.Unlock";
     public static final String BACKGROUND = "com.example.asus.syoucloud.NotificationReceiver.Background";
     public static final String FOREGROUND = "com.example.asus.syoucloud.NotificationReceiver.Foreground";
+    public static final String TIME_OUT = "com.example.asus.syoucloud.NotificationReceiver.Timeout";
     public static final String HEADSET = "android.intent.action.HEADSET_PLUG";
 
     public static final String DATABASE_NAME = "greendaodemo.db";

@@ -1,26 +1,24 @@
-package com.example.asus.syoucloud.presenter;
+package com.example.asus.syoucloud.overlayWindow;
 
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
-import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.bean.LyricItem;
 import com.example.asus.syoucloud.onMusicListener;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.LrcHandle;
-import com.example.asus.syoucloud.view.OverlayWindowManager;
 
 import java.util.List;
 
 public class OverlayWindowPresenter
-        implements Contract.IOverlayWindowPresenter, onMusicListener {
+        implements overlayWindowContract.IOverlayWindowPresenter, onMusicListener {
 
     private static final String TAG = "OverlayWindowPresenter";
 
     private MusicService.MusicPlayer musicPlayer;
-    private Contract.IOverlayWindowManager overlayWindowManager;
+    private overlayWindowContract.IOverlayWindowManager overlayWindowManager;
     private LrcHandle lrcHandle;
     private List<LyricItem> lyricList;
     private Handler handler = new Handler();

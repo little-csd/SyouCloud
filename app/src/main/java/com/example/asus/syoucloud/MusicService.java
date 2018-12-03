@@ -21,11 +21,11 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.example.asus.syoucloud.bean.MusicInfo;
-import com.example.asus.syoucloud.data.DatabaseManager;
+import com.example.asus.syoucloud.data.DataRepository;
+import com.example.asus.syoucloud.musicPlay.MusicPlayActivity;
+import com.example.asus.syoucloud.overlayWindow.OverlayWindowPresenter;
 import com.example.asus.syoucloud.util.BitmapHelper;
-import com.example.asus.syoucloud.presenter.OverlayWindowPresenter;
 import com.example.asus.syoucloud.util.Constant;
-import com.example.asus.syoucloud.view.MusicPlayActivity;
 
 import java.io.IOException;
 import java.util.List;
@@ -54,7 +54,7 @@ public class MusicService extends Service {
         super.onCreate();
         musicPlayer = new MusicPlayer();
 
-        musicPlayer.setMusicList(DatabaseManager.getInstance().getMusicList());
+        musicPlayer.setMusicList(DataRepository.getInstance().getMusicList());
         musicPlayer.initMediaPlayer();
         overlayWindowPresenter = new OverlayWindowPresenter(musicPlayer, getApplicationContext());
     }
@@ -247,6 +247,7 @@ public class MusicService extends Service {
                 filter.addAction(Constant.UNLOCK);
                 filter.addAction(Constant.BACKGROUND);
                 filter.addAction(Constant.FOREGROUND);
+                filter.addAction(Constant.TIME_OUT);
                 filter.addAction(Constant.HEADSET);
                 notificationReceiver = new NotificationReceiver();
                 registerReceiver(notificationReceiver, filter);
@@ -379,6 +380,10 @@ public class MusicService extends Service {
                 case Constant.UNLOCK:
                     overlayWindowPresenter.unLock();
                     break;
+                case Constant.TIME_OUT:
+                    if (musicPlayer.isPlay())
+                        musicPlayer.playOrPause();
+                    break;
                 case Constant.HEADSET:
                     if (!hasPlug) {
                         hasPlug = true;
@@ -386,6 +391,7 @@ public class MusicService extends Service {
                     }
                     if (intent.getIntExtra("state", 0) == 0 && musicPlayer.isPlay)
                         musicPlayer.playOrPause();
+                    break;
                 default:
             }
         }

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#b34c4c"
+    android:orientation="vertical">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/tomato_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:background="@color/colorPrimary"
+            android:fitsSystemWindows="true"
+            android:theme="@style/Base.ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_margin="20dp">
+
+        <com.example.asus.syoucloud.customView.CircleBar
+            android:id="@+id/tomato_bar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:circleWidth="10dp"
+            app:firstColor="#64ffffff"
+            app:maxProgress="15"
+            app:secondColor="#ffffff" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_gravity="center"
+            android:src="@drawable/tomato_icon" />
+
+        <TextView
+            android:id="@+id/tomato_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="80sp" />
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/tomato_play"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
+</LinearLayout>

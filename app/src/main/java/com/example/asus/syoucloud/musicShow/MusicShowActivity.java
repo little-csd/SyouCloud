@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.view;
+package com.example.asus.syoucloud.musicShow;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -12,17 +12,15 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.base.BaseActivity;
 import com.example.asus.syoucloud.bean.MusicInfo;
-import com.example.asus.syoucloud.data.DatabaseManager;
-import com.example.asus.syoucloud.presenter.MusicShowPresenter;
+import com.example.asus.syoucloud.bottomLayout.BottomLayoutFragment;
+import com.example.asus.syoucloud.data.DataRepository;
 import com.example.asus.syoucloud.util.ActivityUtils;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.RecyclerDivider;
@@ -30,8 +28,8 @@ import com.example.asus.syoucloud.util.RecyclerDivider;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MusicShowActivity extends BaseActivity<Contract.IMusicShowActivity, MusicShowPresenter>
-        implements Contract.IMusicShowActivity {
+public class MusicShowActivity extends BaseActivity<musicShowContract.IMusicShowActivity, MusicShowPresenter>
+        implements musicShowContract.IMusicShowActivity {
 
     private MusicListAdapter adapter;
     private Toolbar toolbar;
@@ -113,9 +111,9 @@ public class MusicShowActivity extends BaseActivity<Contract.IMusicShowActivity,
 
         new Thread(() -> {
             List<MusicInfo> musicList;
-            if (albumId == -1) musicList = DatabaseManager.getInstance().getMusicList();
+            if (albumId == -1) musicList = DataRepository.getInstance().getMusicList();
             else {
-                musicList = DatabaseManager.getInstance().getMusicList(albumId);
+                musicList = DataRepository.getInstance().getMusicList(albumId);
                 if (musicList == null) musicList = new ArrayList<>();
             }
             adapter = new MusicListAdapter(musicList);

@@ -1,22 +1,21 @@
-package com.example.asus.syoucloud.presenter;
+package com.example.asus.syoucloud.musicPlay;
 
 import android.os.Handler;
 import android.util.Log;
 
-import com.example.asus.syoucloud.Contract;
-import com.example.asus.syoucloud.LyricView;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.base.BasePresenter;
 import com.example.asus.syoucloud.bean.LyricItem;
-import com.example.asus.syoucloud.data.DatabaseManager;
+import com.example.asus.syoucloud.customView.LyricView;
+import com.example.asus.syoucloud.data.DataRepository;
 import com.example.asus.syoucloud.onMusicListener;
 import com.example.asus.syoucloud.util.Constant;
 
 import java.util.List;
 
-public class LyricFragmentPresenter extends BasePresenter<Contract.ILyricFragment>
-        implements Contract.ILyricPresenter, onMusicListener,
-        LyricView.onLyricListener, DatabaseManager.LyricDownloadListener {
+public class LyricFragmentPresenter extends BasePresenter<musicPlayContract.ILyricFragment>
+        implements musicPlayContract.ILyricPresenter, onMusicListener,
+        LyricView.onLyricListener, DataRepository.LyricDownloadListener {
 
     private MusicService.MusicPlayer musicPlayer;
     private Handler handler = new Handler();
@@ -30,10 +29,10 @@ public class LyricFragmentPresenter extends BasePresenter<Contract.ILyricFragmen
         }
     };
 
-    public LyricFragmentPresenter(MusicService.MusicPlayer musicPlayer) {
+    LyricFragmentPresenter(MusicService.MusicPlayer musicPlayer) {
         this.musicPlayer = musicPlayer;
         musicPlayer.addListener(this, Constant.LYRIC_TYPE);
-        DatabaseManager.getInstance().addLyricDownloadListener(this);
+        DataRepository.getInstance().addLyricDownloadListener(this);
     }
 
     @Override
@@ -42,7 +41,7 @@ public class LyricFragmentPresenter extends BasePresenter<Contract.ILyricFragmen
             long id = musicPlayer.getMusic().getId();
             String TAG = "Lyric";
             Log.i(TAG, "start: " + id);
-            List<LyricItem> lyrics = DatabaseManager.getInstance().searchLyric(id);
+            List<LyricItem> lyrics = DataRepository.getInstance().searchLyric(id);
             if (lyrics.size() > 2)
                 Log.i(TAG, "start: " + lyrics.get(2).getText());
             mViewRef.get().setLyricList(lyrics);
@@ -54,7 +53,7 @@ public class LyricFragmentPresenter extends BasePresenter<Contract.ILyricFragmen
     public void detachView() {
         super.detachView();
         musicPlayer.deleteListener(Constant.LYRIC_TYPE);
-        DatabaseManager.getInstance().removeLyricDownloadListener();
+        DataRepository.getInstance().removeLyricDownloadListener();
         handler.removeCallbacks(timeUpd);
     }
 
@@ -63,7 +62,7 @@ public class LyricFragmentPresenter extends BasePresenter<Contract.ILyricFragmen
         handler.removeCallbacks(timeUpd);
         new Thread(() -> {
             long id = musicPlayer.getMusic().getId();
-            List<LyricItem> lyrics = DatabaseManager.getInstance().searchLyric(id);
+            List<LyricItem> lyrics = DataRepository.getInstance().searchLyric(id);
             mViewRef.get().setLyricList(lyrics);
             handler.post(timeUpd);
             isDownloading = false;
@@ -98,7 +97,7 @@ public class LyricFragmentPresenter extends BasePresenter<Contract.ILyricFragmen
         else {
             mViewRef.get().mkToast(Constant.DOWNLOAD_BEGIN);
             isDownloading = true;
-            DatabaseManager.getInstance().downloadLyric(musicPlayer.getMusic());
+            DataRepository.getInstance().downloadLyric(musicPlayer.getMusic());
         }
     }
 

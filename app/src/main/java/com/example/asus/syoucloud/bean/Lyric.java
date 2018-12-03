@@ -1,16 +1,16 @@
 package com.example.asus.syoucloud.bean;
 
+import com.example.greendaodemo.db.DaoSession;
+import com.example.greendaodemo.db.LyricDao;
+import com.example.greendaodemo.db.LyricItemDao;
+
+import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.OrderBy;
 import org.greenrobot.greendao.annotation.ToMany;
 
 import java.util.List;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.DaoException;
-import com.example.greendaodemo.db.DaoSession;
-import com.example.greendaodemo.db.LyricItemDao;
-import com.example.greendaodemo.db.LyricDao;
 
 @Entity
 public class Lyric {
@@ -20,11 +20,15 @@ public class Lyric {
     @ToMany(referencedJoinProperty = "fromLyric")
     private List<LyricItem> lyricItems;
 
-    /** Used to resolve relations */
+    /**
+     * Used to resolve relations
+     */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
 
-    /** Used for active entity operations. */
+    /**
+     * Used for active entity operations.
+     */
     @Generated(hash = 1685673968)
     private transient LyricDao myDao;
 
@@ -68,7 +72,9 @@ public class Lyric {
         return lyricItems;
     }
 
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
     @Generated(hash = 828901999)
     public synchronized void resetLyricItems() {
         lyricItems = null;
@@ -110,7 +116,9 @@ public class Lyric {
         myDao.update(this);
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 1578765116)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;

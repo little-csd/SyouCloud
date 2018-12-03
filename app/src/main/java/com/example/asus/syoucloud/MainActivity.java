@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.view;
+package com.example.asus.syoucloud;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,9 +19,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.R;
+import com.example.asus.syoucloud.bottomLayout.BottomLayoutFragment;
+import com.example.asus.syoucloud.musicShow.MusicShowActivity;
+import com.example.asus.syoucloud.tomatoClock.TomatoClockActivity;
 import com.example.asus.syoucloud.bean.MixItem;
-import com.example.asus.syoucloud.data.DatabaseManager;
+import com.example.asus.syoucloud.data.DataRepository;
 import com.example.asus.syoucloud.util.ActivityUtils;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.RecyclerDivider;
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         ActivityUtils.addFragmentToActivity(getSupportFragmentManager(),
                 fragment, R.id.bottom_layout);
 
-        mixId = DatabaseManager.getInstance().getMixMax();
+        mixId = DataRepository.getInstance().getMixMax();
 
         initToolbar();
         initView();
@@ -71,7 +73,15 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener((item) -> {
-            mDrawerLayout.closeDrawers();
+            switch (item.getItemId()) {
+                case R.id.nav_alarm:
+                    Intent intent = new Intent(this, TomatoClockActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    break;
+                default:
+                    mDrawerLayout.closeDrawers();
+            }
             return true;
         });
 
@@ -87,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView mixRecycler = findViewById(R.id.mix_recycler);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mixRecycler.setLayoutManager(layoutManager);
-        adapter = new MixListAdapter(getApplicationContext());
+        adapter = new MixListAdapter(this);
         mixRecycler.setAdapter(adapter);
         mixRecycler.addItemDecoration(new RecyclerDivider(getApplicationContext(),
                 LinearLayoutManager.VERTICAL, 1, Constant.ITEM_DECORATION));
@@ -122,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void addMix(String title, String password) {
         MixItem mixItem = new MixItem(mixId++, title, password);
-        DatabaseManager.getInstance().addMixItem(mixItem);
+        DataRepository.getInstance().addMixItem(mixItem);
         adapter.notifyItemInserted(mixId);
     }
 

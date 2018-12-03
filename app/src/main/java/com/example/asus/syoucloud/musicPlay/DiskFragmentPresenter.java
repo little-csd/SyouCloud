@@ -1,24 +1,23 @@
-package com.example.asus.syoucloud.presenter;
+package com.example.asus.syoucloud.musicPlay;
 
 import android.content.Context;
 
-import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.base.BasePresenter;
 import com.example.asus.syoucloud.bean.MusicInfo;
-import com.example.asus.syoucloud.data.DatabaseManager;
-import com.example.asus.syoucloud.util.BitmapHelper;
+import com.example.asus.syoucloud.data.DataRepository;
 import com.example.asus.syoucloud.onMusicListener;
+import com.example.asus.syoucloud.util.BitmapHelper;
 import com.example.asus.syoucloud.util.Constant;
 
-public class DiskFragmentPresenter extends BasePresenter<Contract.IDiskLayoutFragment>
-        implements Contract.IDiskLayoutPresenter, onMusicListener {
+public class DiskFragmentPresenter extends BasePresenter<musicPlayContract.IDiskLayoutFragment>
+        implements musicPlayContract.IDiskLayoutPresenter, onMusicListener {
 
     private Context context;
     private MusicService.MusicPlayer musicPlayer;
     private MusicInfo music;
 
-    public DiskFragmentPresenter(Context context, MusicService.MusicPlayer musicPlayer) {
+    DiskFragmentPresenter(Context context, MusicService.MusicPlayer musicPlayer) {
         this.context = context;
         this.musicPlayer = musicPlayer;
         musicPlayer.addListener(this, Constant.DISK_TYPE);
@@ -45,7 +44,7 @@ public class DiskFragmentPresenter extends BasePresenter<Contract.IDiskLayoutFra
     @Override
     public void addToDatabase(int albumId) {
         if (music == null) return;
-        DatabaseManager.getInstance().addMusicToMix(music, albumId);
+        DataRepository.getInstance().addMusicToMix(music, albumId);
     }
 
     @Override

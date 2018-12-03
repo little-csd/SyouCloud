@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.view;
+package com.example.asus.syoucloud.musicPlay;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -12,13 +12,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.Contract;
-import com.example.asus.syoucloud.LyricView;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.base.BaseActivity;
 import com.example.asus.syoucloud.bean.MusicInfo;
-import com.example.asus.syoucloud.presenter.MusicPlayActivityPresenter;
 import com.example.asus.syoucloud.util.ActivityUtils;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.TimeUtil;
@@ -30,8 +27,8 @@ import butterknife.OnClick;
 import static com.example.asus.syoucloud.util.Constant.LIST_LOOP;
 import static com.example.asus.syoucloud.util.Constant.SINGLE_LOOP;
 
-public class MusicPlayActivity extends BaseActivity<Contract.IMusicPlayActivity,
-        MusicPlayActivityPresenter> implements Contract.IMusicPlayActivity {
+public class MusicPlayActivity extends BaseActivity<musicPlayContract.IMusicPlayActivity,
+        MusicPlayActivityPresenter> implements musicPlayContract.IMusicPlayActivity {
 
     @BindView(R.id.music_play_back)
     ImageView musicPlayBack;

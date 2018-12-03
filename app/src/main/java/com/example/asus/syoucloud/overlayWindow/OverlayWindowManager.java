@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.view;
+package com.example.asus.syoucloud.overlayWindow;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -11,15 +11,14 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.R;
 
 public class OverlayWindowManager implements View.OnTouchListener, View.OnClickListener,
-        Contract.IOverlayWindowManager {
+        overlayWindowContract.IOverlayWindowManager {
 
     private WindowManager.LayoutParams params;
     private WindowManager windowManager;
-    private Contract.IOverlayWindowPresenter mPresenter;
+    private overlayWindowContract.IOverlayWindowPresenter mPresenter;
 
     private View overlayNormal;
     private View overlayClick;
@@ -48,7 +47,7 @@ public class OverlayWindowManager implements View.OnTouchListener, View.OnClickL
     }
 
     @Override
-    public void setPresenter(Contract.IOverlayWindowPresenter presenter) {
+    public void setPresenter(overlayWindowContract.IOverlayWindowPresenter presenter) {
         mPresenter = presenter;
     }
 

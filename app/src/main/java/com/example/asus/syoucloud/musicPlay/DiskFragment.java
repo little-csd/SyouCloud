@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.view;
+package com.example.asus.syoucloud.musicPlay;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -18,12 +18,10 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
-import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.base.BaseFragment;
-import com.example.asus.syoucloud.data.DatabaseManager;
-import com.example.asus.syoucloud.presenter.DiskFragmentPresenter;
+import com.example.asus.syoucloud.data.DataRepository;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,8 +30,8 @@ import butterknife.Unbinder;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
-public class DiskFragment extends BaseFragment<Contract.IDiskLayoutFragment, DiskFragmentPresenter>
-        implements Contract.IDiskLayoutFragment {
+public class DiskFragment extends BaseFragment<musicPlayContract.IDiskLayoutFragment, DiskFragmentPresenter>
+        implements musicPlayContract.IDiskLayoutFragment {
 
     private static final String TAG = "DiskFragment";
     @BindView(R.id.album_image)
@@ -125,7 +123,7 @@ public class DiskFragment extends BaseFragment<Contract.IDiskLayoutFragment, Dis
             return;
         }
         mPresenter.noticeAdd();
-        String[] items = DatabaseManager.getInstance().getMixTitleItems();
+        String[] items = DataRepository.getInstance().getMixTitleItems();
         new AlertDialog.Builder(context)
                 .setTitle("Save to mix")
                 .setItems(items, (dialog, which) -> mPresenter.addToDatabase(which))

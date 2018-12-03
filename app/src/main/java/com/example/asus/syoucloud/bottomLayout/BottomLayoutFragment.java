@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.view;
+package com.example.asus.syoucloud.bottomLayout;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,11 +16,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.asus.syoucloud.Contract;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.base.BaseFragment;
-import com.example.asus.syoucloud.presenter.BottomLayoutPresenter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,12 +27,10 @@ import butterknife.Unbinder;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
-public class BottomLayoutFragment extends BaseFragment<Contract.IBottomLayoutFragment,
-        BottomLayoutPresenter> implements Contract.IBottomLayoutFragment {
+public class BottomLayoutFragment extends BaseFragment<bottomLayoutContract.IBottomLayoutFragment,
+        BottomLayoutPresenter> implements bottomLayoutContract.IBottomLayoutFragment {
 
     private static final String TAG = "BottomLayoutFragment";
-    private int type;
-
     @BindView(R.id.bottom_bitmap)
     ImageView bottomBitmap;
     @BindView(R.id.bottom_title)
@@ -46,7 +42,7 @@ public class BottomLayoutFragment extends BaseFragment<Contract.IBottomLayoutFra
     @BindView(R.id.bottom_play)
     ImageView bottomPlay;
     Unbinder unbinder;
-
+    private int type;
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -123,7 +119,7 @@ public class BottomLayoutFragment extends BaseFragment<Contract.IBottomLayoutFra
         super.onDestroyView();
         unbinder.unbind();
         if (getActivity() != null)
-        getActivity().getApplicationContext().unbindService(connection);
+            getActivity().getApplicationContext().unbindService(connection);
     }
 
     @OnClick({R.id.bottom_text, R.id.bottom_play})

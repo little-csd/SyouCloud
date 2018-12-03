@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.view;
+package com.example.asus.syoucloud;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,9 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.bean.MixItem;
-import com.example.asus.syoucloud.data.DatabaseManager;
+import com.example.asus.syoucloud.data.DataRepository;
+import com.example.asus.syoucloud.musicShow.MusicShowActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +25,8 @@ public class MixListAdapter extends RecyclerView.Adapter<MixListAdapter.ViewHold
     private List<MixItem> mixList;
     private Context mContext;
 
-    public MixListAdapter(Context context) {
-        mixList = DatabaseManager.getInstance().getMixList();
+    MixListAdapter(Context context) {
+        mixList = DataRepository.getInstance().getMixList();
         if (mixList == null) mixList = new ArrayList<>();
         mContext = context;
     }

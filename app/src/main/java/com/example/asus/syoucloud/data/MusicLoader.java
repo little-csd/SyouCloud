@@ -41,7 +41,7 @@ public class MusicLoader {
         if (cursor == null) Log.i(TAG, "BitmapHelper: cursor = null");
         else if (!cursor.moveToFirst()) Log.i(TAG, "BitmapHelper: cursor moveToFirst error");
         else {
-            DatabaseManager databaseManager = DatabaseManager.getInstance();
+            DataRepository dataRepository = DataRepository.getInstance();
             int idCol = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
             int titleCol = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
             int urlCol = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
@@ -60,7 +60,7 @@ public class MusicLoader {
                 String artist = cursor.getString(artistCol);
                 String url = cursor.getString(urlCol);
                 MusicInfo musicInfo = new MusicInfo(id, size, duration, albumId, title, album, artist, url);
-                databaseManager.addMusic(musicInfo);
+                dataRepository.addMusic(musicInfo);
             } while (cursor.moveToNext());
             cursor.close();
         }

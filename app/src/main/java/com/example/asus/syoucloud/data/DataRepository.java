@@ -28,12 +28,12 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Response;
 
-public class DatabaseManager {
+public class DataRepository {
 
-    private static final String TAG = "DatabaseManager";
+    private static final String TAG = "DataRepository";
 
     private static final long DEFAULT_LYRIC = 1;
-    public static DatabaseManager manager;
+    public static DataRepository manager;
     private DaoSession daoSession;
     private MusicInfoDao musicInfoDao;
     private MixItemDao mixItemDao;
@@ -45,15 +45,16 @@ public class DatabaseManager {
     private MusicLoader musicLoader;
     private DataChangeListener dataChangeListener;
     private LyricDownloadListener downloadListener;
+    private long beginTime = 0;
     private long maxJoin = 0;
     private long maxLrcItem = 0;
 
-    private DatabaseManager() {
+    private DataRepository() {
 
     }
 
-    public static DatabaseManager getInstance() {
-        if (manager == null) manager = new DatabaseManager();
+    public static DataRepository getInstance() {
+        if (manager == null) manager = new DataRepository();
         return manager;
     }
 
@@ -217,6 +218,14 @@ public class DatabaseManager {
 
     public void removeLyricDownloadListener() {
         downloadListener = null;
+    }
+
+    public void saveBeginTime(long beginTime) {
+        this.beginTime = beginTime;
+    }
+
+    public long getBeginTime() {
+        return beginTime;
     }
 
     public interface DataChangeListener {

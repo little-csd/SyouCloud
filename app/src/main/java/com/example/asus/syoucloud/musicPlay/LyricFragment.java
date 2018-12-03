@@ -1,4 +1,4 @@
-package com.example.asus.syoucloud.view;
+package com.example.asus.syoucloud.musicPlay;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,21 +16,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.asus.syoucloud.Contract;
-import com.example.asus.syoucloud.LyricView;
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.R;
 import com.example.asus.syoucloud.base.BaseFragment;
 import com.example.asus.syoucloud.bean.LyricItem;
-import com.example.asus.syoucloud.presenter.LyricFragmentPresenter;
+import com.example.asus.syoucloud.customView.LyricView;
 import com.example.asus.syoucloud.util.Constant;
 
 import java.util.List;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
-public class LyricFragment extends BaseFragment<Contract.ILyricFragment, LyricFragmentPresenter>
-        implements Contract.ILyricFragment {
+public class LyricFragment extends BaseFragment<musicPlayContract.ILyricFragment, LyricFragmentPresenter>
+        implements musicPlayContract.ILyricFragment {
 
     private static final String TAG = "LyricFragment";
 
