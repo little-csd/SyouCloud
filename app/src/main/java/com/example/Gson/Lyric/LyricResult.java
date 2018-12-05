@@ -1,4 +1,4 @@
-package com.example.Gson;
+package com.example.Gson.Lyric;
 
 public class LyricResult {
     private int aid;

@@ -1,5 +1,7 @@
 package com.example.asus.syoucloud.util;
 
+import android.os.Environment;
+
 public class Constant {
     public static final int SINGLE_LOOP = 1;
     public static final int LIST_LOOP = 2;
@@ -35,4 +37,11 @@ public class Constant {
     public static final String HEADSET = "android.intent.action.HEADSET_PLUG";
 
     public static final String DATABASE_NAME = "greendaodemo.db";
+
+    public static final String SEARCH_MUSIC = " https://api.bzqll.com/music/netease/search?key=579621905&s=";
+    private static final String target = Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_DOWNLOADS).toString();
+    public static final String musicTarget = target + "/music/";
+    public static final String lyricTarget = target + "/lyric/";
+    public static final String bmpTarget = target + "/bitmap/";
 }

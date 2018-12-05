@@ -5,6 +5,10 @@
             android:title="@string/alarm"
             android:icon="@drawable/nav_alarm_icon"/>
         <item
+            android:id="@+id/nav_search"
+            android:title="@string/search"
+            android:icon="@drawable/nav_search"/>
+        <item
             android:id="@+id/nav_friends"
             android:title="@string/friends"
             android:icon="@drawable/nav_friend_icon"/>

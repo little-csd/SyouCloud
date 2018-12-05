@@ -6,20 +6,20 @@ import android.util.Log;
 
 import com.example.asus.syoucloud.MusicService;
 import com.example.asus.syoucloud.bean.LyricItem;
+import com.example.asus.syoucloud.data.DataRepository;
 import com.example.asus.syoucloud.onMusicListener;
 import com.example.asus.syoucloud.util.Constant;
-import com.example.asus.syoucloud.util.LrcHandle;
+import com.example.asus.syoucloud.util.ThreadPool;
 
 import java.util.List;
 
-public class OverlayWindowPresenter
-        implements overlayWindowContract.IOverlayWindowPresenter, onMusicListener {
+public class OverlayWindowPresenter implements overlayWindowContract.IOverlayWindowPresenter,
+        onMusicListener, DataRepository.LyricDownloadListener {
 
     private static final String TAG = "OverlayWindowPresenter";
 
     private MusicService.MusicPlayer musicPlayer;
     private overlayWindowContract.IOverlayWindowManager overlayWindowManager;
-    private LrcHandle lrcHandle;
     private List<LyricItem> lyricList;
     private Handler handler = new Handler();
 
@@ -52,12 +52,8 @@ public class OverlayWindowPresenter
         overlayWindowManager.setPresenter(this);
         overlayWindowManager.initData(context);
 
-        // TODO: 2018/11/30 add lyric here
-        new Thread(() -> {
-            lrcHandle = LrcHandle.getInstance();
-            lrcHandle.readLRC("/storage/emulated/0/Download/鳥の詩.lrc");
-            lyricList = lrcHandle.getLyricList();
-        }).start();
+        ThreadPool.getInstance().execute(() -> lyricList =
+                DataRepository.getInstance().searchLyric(musicPlayer.getMusic().getId()));
     }
 
     @Override
@@ -92,6 +88,7 @@ public class OverlayWindowPresenter
         isLyricShow = true;
         handler.post(updLyric);
         musicPlayer.addListener(this, Constant.OVERLAY_TYPE);
+        DataRepository.getInstance().addOverlayDownloadListener(this);
         overlayWindowManager.showLyric(musicPlayer.isPlay());
     }
 
@@ -100,6 +97,7 @@ public class OverlayWindowPresenter
         isLyricShow = false;
         handler.removeCallbacks(updLyric);
         musicPlayer.deleteListener(Constant.OVERLAY_TYPE);
+        DataRepository.getInstance().removeOverlayDownloadListener();
         overlayWindowManager.removeLyric();
     }
 
@@ -121,8 +119,10 @@ public class OverlayWindowPresenter
     @Override
     public void onMusicCompletion() {
         handler.removeCallbacks(updLyric);
-        // TODO: 2018/11/29 add lyric
-        handler.post(updLyric);
+        ThreadPool.getInstance().execute(() -> {
+            lyricList = DataRepository.getInstance().searchLyric(musicPlayer.getMusic().getId());
+            handler.post(updLyric);
+        });
     }
 
     @Override
@@ -140,6 +140,11 @@ public class OverlayWindowPresenter
     @Override
     public void onStopUpd() {
         handler.removeCallbacks(updLyric);
+    }
+
+    @Override
+    public void update() {
+        onMusicCompletion();
     }
 
     private int findCurrentLine(int time) {

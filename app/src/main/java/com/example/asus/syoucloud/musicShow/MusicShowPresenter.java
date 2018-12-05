@@ -36,4 +36,9 @@ public class MusicShowPresenter extends BasePresenter<musicShowContract.IMusicSh
     public void add(MusicInfo music) {
         mViewRef.get().add(music);
     }
+
+    @Override
+    public void hasDownload(MusicInfo music) {
+        if (albumId == -1) mViewRef.get().add(music);
+    }
 }

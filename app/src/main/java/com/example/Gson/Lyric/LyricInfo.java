@@ -1,4 +1,4 @@
-package com.example.Gson;
+package com.example.Gson.Lyric;
 
 import java.util.List;
 

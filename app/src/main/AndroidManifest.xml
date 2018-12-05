@@ -14,12 +14,16 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:screenOrientation="portrait"
         android:supportsRtl="true"
         android:theme="@style/SyoCloudTheme">
-        <activity android:name=".MainActivity" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".musicPlay.MusicPlayActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="MUSIC_PLAY_ACTIVITY" />
 
@@ -31,17 +35,26 @@
 
         <activity
             android:name=".musicShow.MusicShowActivity"
-            android:label="Mix" />
-        <activity android:name=".AdvertiseActivity">
+            android:label="Mix"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".AdvertiseActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".tomatoClock.TomatoClockActivity"
+        <activity
+            android:name=".tomatoClock.TomatoClockActivity"
+            android:label="Tomato Clock"
             android:launchMode="singleTop"
-            android:label="Tomato Clock" />
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".internetSearch.InternetSearchActivity"
+            android:label="Search on Internet"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

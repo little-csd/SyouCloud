@@ -32,7 +32,7 @@
             android:layout_height="match_parent"
             app:circleWidth="10dp"
             app:firstColor="#64ffffff"
-            app:maxProgress="15"
+            app:maxProgress="1500"
             app:secondColor="#ffffff" />
 
         <ImageView

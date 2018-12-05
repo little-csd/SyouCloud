@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.asus.syoucloud.util.Constant;
+import com.example.asus.syoucloud.util.ThreadPool;
 
 public class MusicApplication extends Application {
 
@@ -19,6 +20,7 @@ public class MusicApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        ThreadPool.getInstance();
         Intent backIntent = new Intent(Constant.BACKGROUND);
         Intent foreIntent = new Intent(Constant.FOREGROUND);
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {

@@ -24,6 +24,7 @@ import com.example.asus.syoucloud.data.DataRepository;
 import com.example.asus.syoucloud.util.ActivityUtils;
 import com.example.asus.syoucloud.util.Constant;
 import com.example.asus.syoucloud.util.RecyclerDivider;
+import com.example.asus.syoucloud.util.ThreadPool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +110,7 @@ public class MusicShowActivity extends BaseActivity<musicShowContract.IMusicShow
             }
         });
 
-        new Thread(() -> {
+        ThreadPool.getInstance().execute(() -> {
             List<MusicInfo> musicList;
             if (albumId == -1) musicList = DataRepository.getInstance().getMusicList();
             else {
@@ -119,7 +120,7 @@ public class MusicShowActivity extends BaseActivity<musicShowContract.IMusicShow
             adapter = new MusicListAdapter(musicList);
             adapter.setOnMusicClickListener(mPresenter);
             recyclerView.setAdapter(adapter);
-        }).start();
+        });
     }
 
     @Override

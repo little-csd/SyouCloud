@@ -12,7 +12,7 @@ import com.example.asus.syoucloud.bean.MixItem;
 import com.example.asus.syoucloud.bean.MusicAndMixJoin;
 import com.example.asus.syoucloud.bean.MusicInfo;
 import com.example.asus.syoucloud.util.Constant;
-import com.example.asus.syoucloud.util.HttpHelper;
+import com.example.asus.syoucloud.util.NetworkHelper;
 import com.example.greendaodemo.db.DaoMaster;
 import com.example.greendaodemo.db.DaoSession;
 import com.example.greendaodemo.db.LyricDao;
@@ -21,6 +21,8 @@ import com.example.greendaodemo.db.MixItemDao;
 import com.example.greendaodemo.db.MusicAndMixJoinDao;
 import com.example.greendaodemo.db.MusicInfoDao;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,8 @@ public class DataRepository {
     private MixLoader mixLoader;
     private MusicLoader musicLoader;
     private DataChangeListener dataChangeListener;
-    private LyricDownloadListener downloadListener;
+    private LyricDownloadListener downloadListenerL;
+    private LyricDownloadListener downloadListenerO;
     private long beginTime = 0;
     private long maxJoin = 0;
     private long maxLrcItem = 0;
@@ -66,8 +69,8 @@ public class DataRepository {
         this.context = context;
 
         initMixItem();
-        initMusic();
         initLyric();
+        initMusic();
     }
 
     private void initMixItem() {
@@ -102,12 +105,12 @@ public class DataRepository {
 
     public void downloadLyric(MusicInfo music) {
         String address = "http://geci.me/api/lyric/" + music.getTitle();
-        HttpHelper.sendLyricDownloadRequest(address, new okhttp3.Callback() {
+        NetworkHelper.sendDownloadRequest(address, new okhttp3.Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
                 Log.i(TAG, "onFailure: " + "download Lyric info");
-                downloadListener.mkToast(Constant.DOWNLOAD_FAIL);
+                downloadListenerL.mkToast(Constant.DOWNLOAD_FAIL);
             }
 
             @Override
@@ -116,7 +119,7 @@ public class DataRepository {
                 String url = ParseHelper.parseLyricInfo(responseData);
                 if (url.isEmpty()) {
                     Log.i(TAG, "onResponse: " + "lyric not found");
-                    downloadListener.mkToast(Constant.DOWNLOAD_NOT_FOUND);
+                    downloadListenerL.mkToast(Constant.DOWNLOAD_NOT_FOUND);
                     return;
                 }
                 downloadLyricReal(url, music.getId());
@@ -125,12 +128,12 @@ public class DataRepository {
     }
 
     private void downloadLyricReal(String address, long id) {
-        HttpHelper.sendLyricDownloadRequest(address, new okhttp3.Callback() {
+        NetworkHelper.sendDownloadRequest(address, new okhttp3.Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.i(TAG, "onFailure: " + "download lyric");
                 e.printStackTrace();
-                if (downloadListener != null) downloadListener.mkToast(Constant.DOWNLOAD_FAIL);
+                if (downloadListenerL != null) downloadListenerL.mkToast(Constant.DOWNLOAD_FAIL);
             }
 
             @Override
@@ -144,12 +147,43 @@ public class DataRepository {
                     lyricItemDao.insert(item);
                 }
                 lyricDao.insert(new Lyric(id));
-                if (downloadListener != null) {
-                    downloadListener.update();
-                    downloadListener.mkToast(Constant.DOWNLOAD_SUCCESS);
+                if (downloadListenerL != null) {
+                    downloadListenerL.update();
+                    downloadListenerL.mkToast(Constant.DOWNLOAD_SUCCESS);
                 }
+                if (downloadListenerO != null) downloadListenerO.update();
             }
         });
+    }
+
+    public void hasLyricDownload(long id, String title) {
+        String address = Constant.lyricTarget + title + ".lrc";
+        File file = new File(address);
+        if (!file.exists()) {
+            Log.i(TAG, "hasLyricDownload: load lyric fail");
+            return;
+        }
+        try {
+            FileInputStream in = new FileInputStream(file);
+            byte temp[] = new byte[1024];
+            StringBuilder sb = new StringBuilder("");
+            int len;
+            while ((len = in.read(temp)) > 0) {
+                sb.append(new String(temp, 0, len));
+            }
+            List<LyricItem> lyric = ParseHelper.parseLyric(sb.toString());
+            for (int i = 0; i < lyric.size(); i++) {
+                LyricItem item = lyric.get(i);
+                item.setId(++maxLrcItem);
+                item.setFromLyric(id);
+                lyricItemDao.insert(item);
+            }
+            lyricDao.insert(new Lyric(id));
+            Log.i(TAG, "hasLyricDownload: succeed");
+        } catch (IOException e) {
+            Log.i(TAG, "hasLyricDownload: " + e);
+            e.printStackTrace();
+        }
     }
 
     public List<LyricItem> searchLyric(long id) {
@@ -183,6 +217,12 @@ public class DataRepository {
     public void addMusic(MusicInfo music) {
         musicInfoDao.insertOrReplace(music);
         musicLoader.addMusic(music);
+        if (music.getAlbumId() == -1 && dataChangeListener != null)
+            dataChangeListener.hasDownload(music);
+    }
+
+    public long getMaxMusicId() {
+        return musicLoader.getMaxId();
     }
 
     public void addMusicToMix(MusicInfo music, int albumId) {
@@ -213,11 +253,19 @@ public class DataRepository {
     }
 
     public void addLyricDownloadListener(LyricDownloadListener listener) {
-        this.downloadListener = listener;
+        this.downloadListenerL = listener;
     }
 
     public void removeLyricDownloadListener() {
-        downloadListener = null;
+        downloadListenerL = null;
+    }
+
+    public void addOverlayDownloadListener(LyricDownloadListener listener) {
+        this.downloadListenerO = listener;
+    }
+
+    public void removeOverlayDownloadListener() {
+        downloadListenerO = null;
     }
 
     public void saveBeginTime(long beginTime) {
@@ -230,10 +278,13 @@ public class DataRepository {
 
     public interface DataChangeListener {
         void add(MusicInfo music);
+
+        void hasDownload(MusicInfo music);
     }
 
     public interface LyricDownloadListener {
-        void mkToast(int type);
+        default void mkToast(int type) {
+        }
 
         void update();
     }

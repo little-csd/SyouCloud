@@ -1,5 +1,11 @@
 package com.example.Gson;
 
+import android.util.Log;
+
+import com.example.Gson.Lyric.LyricInfo;
+import com.example.Gson.Lyric.LyricResult;
+import com.example.Gson.Music.MusicResult;
+import com.example.Gson.Music.MusicResultItem;
 import com.example.asus.syoucloud.bean.LyricItem;
 import com.google.gson.Gson;
 
@@ -15,6 +21,12 @@ public class ParseHelper {
         List<LyricResult> list = new Gson().fromJson(data, LyricInfo.class).getResult();
         if (list == null || list.isEmpty()) return "";
         else return list.get(0).getLrc();
+    }
+
+    public static List<MusicResultItem> parseMusicList(String data) {
+        List<MusicResultItem> list = new Gson().fromJson(data, MusicResult.class).getData();
+        if (list == null) list = new ArrayList<>();
+        return list;
     }
 
     public static List<LyricItem> parseLyric(String data) {
@@ -45,6 +57,7 @@ public class ParseHelper {
     }
 
     private static void timeRead(String s, String text, String translate) {
+        String TAG = "ParseHelper";
         s = s.replace(".", ":");
         String time[] = s.split(":");
         int minute, second, millSecond;
@@ -62,7 +75,8 @@ public class ParseHelper {
     private static void addTime(String s, String text, String translate) {
         while (s.contains("]")) {
             String ss = s.substring(s.indexOf("[") + 1, s.indexOf("]"));
-            if (s.length() > 10) s = s.substring(10, s.length());
+            if (s.indexOf("]") + 1 < s.length())
+                s = s.substring(s.indexOf("]") + 1, s.length());
             else s = "";
             timeRead(ss, text, translate);
         }

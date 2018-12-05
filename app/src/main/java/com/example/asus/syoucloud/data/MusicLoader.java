@@ -80,4 +80,9 @@ public class MusicLoader {
                 musicList.remove(i);
         }
     }
+
+    public long getMaxId() {
+        if (musicList.isEmpty()) return Integer.MAX_VALUE;
+        else return musicList.get(musicList.size() - 1).getId();
+    }
 }

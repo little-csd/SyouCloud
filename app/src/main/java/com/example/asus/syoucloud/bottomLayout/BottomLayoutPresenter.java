@@ -37,7 +37,10 @@ public class BottomLayoutPresenter extends BasePresenter<bottomLayoutContract.IB
         fragment.setArtist(music.getArtist());
         fragment.setTitle(music.getTitle());
         fragment.pause();
-        BitmapHelper.setBitmap(context, fragment.getIgvView(), music.getAlbumId());
+        if (music.getAlbumId() != -1)
+            BitmapHelper.setBitmapLocal(context, fragment.getIgvView(), music.getAlbumId());
+        else
+            BitmapHelper.setBitmapNetwork(context, fragment.getIgvView(), music.getTitle());
     }
 
     @Override

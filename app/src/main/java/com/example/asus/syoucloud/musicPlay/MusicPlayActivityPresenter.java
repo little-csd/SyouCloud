@@ -56,7 +56,8 @@ public class MusicPlayActivityPresenter extends BasePresenter<musicPlayContract.
         musicPlayer.addListener(this, Constant.MUSIC_PLAY_TYPE);
         loopStyle = musicPlayer.getPlayStyle();
         boolean isPlay = musicPlayer.isPlay();
-        mViewRef.get().initData(musicPlayer.getMusic(),
+        int duration = musicPlayer.getDuration();
+        mViewRef.get().initData(musicPlayer.getMusic(), duration,
                 musicPlayer.getCurrentProgress() / 1000, loopStyle, isPlay);
         mViewRef.get().addFragment(fragmentType++);
         updateHandler.post(progressUpd);
@@ -103,7 +104,8 @@ public class MusicPlayActivityPresenter extends BasePresenter<musicPlayContract.
 
     @Override
     public void onMusicCompletion() {
-        mViewRef.get().initData(musicPlayer.getMusic(), 0, loopStyle, true);
+        int duration = musicPlayer.getDuration();
+        mViewRef.get().initData(musicPlayer.getMusic(), duration, 0, loopStyle, true);
         updateHandler.removeCallbacks(progressUpd);
         updateHandler.post(progressUpd);
     }

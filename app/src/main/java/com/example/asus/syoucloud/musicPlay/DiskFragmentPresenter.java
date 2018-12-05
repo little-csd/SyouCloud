@@ -49,7 +49,13 @@ public class DiskFragmentPresenter extends BasePresenter<musicPlayContract.IDisk
 
     @Override
     public void onMusicCompletion() {
-        BitmapHelper.setBitmap(context, mViewRef.get().getIgvView(), musicPlayer.getMusic().getAlbumId());
+        int albumId = musicPlayer.getMusic().getAlbumId();
+        if (albumId != -1)
+            BitmapHelper.setBitmapLocal(context, mViewRef.get().getIgvView(), albumId);
+        else  {
+            String title = musicPlayer.getMusic().getTitle();
+            BitmapHelper.setBitmapNetwork(context, mViewRef.get().getIgvView(), title);
+        }
         mViewRef.get().startAnim();
     }
 

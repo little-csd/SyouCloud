@@ -45,7 +45,7 @@ public interface musicPlayContract {
 
         void update(int time);
 
-        void initData(MusicInfo music, int progress, int style, boolean isPlay);
+        void initData(MusicInfo music, int duration, int progress, int style, boolean isPlay);
     }
 
     interface IDiskLayoutPresenter {

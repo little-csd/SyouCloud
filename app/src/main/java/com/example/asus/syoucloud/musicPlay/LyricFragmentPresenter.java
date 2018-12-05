@@ -10,6 +10,7 @@ import com.example.asus.syoucloud.customView.LyricView;
 import com.example.asus.syoucloud.data.DataRepository;
 import com.example.asus.syoucloud.onMusicListener;
 import com.example.asus.syoucloud.util.Constant;
+import com.example.asus.syoucloud.util.ThreadPool;
 
 import java.util.List;
 
@@ -37,16 +38,12 @@ public class LyricFragmentPresenter extends BasePresenter<musicPlayContract.ILyr
 
     @Override
     public void start() {
-        new Thread(() -> {
+        ThreadPool.getInstance().execute(() -> {
             long id = musicPlayer.getMusic().getId();
-            String TAG = "Lyric";
-            Log.i(TAG, "start: " + id);
             List<LyricItem> lyrics = DataRepository.getInstance().searchLyric(id);
-            if (lyrics.size() > 2)
-                Log.i(TAG, "start: " + lyrics.get(2).getText());
             mViewRef.get().setLyricList(lyrics);
             handler.post(timeUpd);
-        }).start();
+        });
     }
 
     @Override
@@ -60,13 +57,13 @@ public class LyricFragmentPresenter extends BasePresenter<musicPlayContract.ILyr
     @Override
     public void onMusicCompletion() {
         handler.removeCallbacks(timeUpd);
-        new Thread(() -> {
+        ThreadPool.getInstance().execute(() -> {
             long id = musicPlayer.getMusic().getId();
             List<LyricItem> lyrics = DataRepository.getInstance().searchLyric(id);
             mViewRef.get().setLyricList(lyrics);
             handler.post(timeUpd);
             isDownloading = false;
-        }).start();
+        });
     }
 
     @Override

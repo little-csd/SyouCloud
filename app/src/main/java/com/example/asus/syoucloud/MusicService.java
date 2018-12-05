@@ -98,6 +98,10 @@ public class MusicService extends Service {
             return mediaPlayer.getCurrentPosition();
         }
 
+        public int getDuration() {
+            return mediaPlayer.getDuration();
+        }
+
         public boolean isPlay() {
             return isPlay;
         }
@@ -202,8 +206,11 @@ public class MusicService extends Service {
 
             MusicInfo music = musicPlayer.getMusic();
             remoteViews = new RemoteViews(getPackageName(), R.layout.custom_notification);
-            remoteViews.setImageViewBitmap(R.id.notification_image, BitmapHelper.getBitmap(
+            if (music.getAlbumId() != -1)
+            remoteViews.setImageViewBitmap(R.id.notification_image, BitmapHelper.getBitmapLocal(
                     getApplicationContext(), music.getAlbumId(), 160, 110));
+            else remoteViews.setImageViewBitmap(R.id.notification_image, BitmapHelper.getBitmapNetwork(
+                    getApplicationContext(), music.getTitle(), 160, 110));
             remoteViews.setTextViewText(R.id.notification_title, music.getTitle());
             remoteViews.setTextViewText(R.id.notification_artist, music.getArtist());
 
@@ -265,8 +272,11 @@ public class MusicService extends Service {
 
         private void updateNotification() {
             MusicInfo music = getMusic();
-            remoteViews.setImageViewBitmap(R.id.notification_image, BitmapHelper.getBitmap(
+            if (music.getAlbumId() != -1)
+            remoteViews.setImageViewBitmap(R.id.notification_image, BitmapHelper.getBitmapLocal(
                     getApplicationContext(), music.getAlbumId(), 160, 110));
+            else remoteViews.setImageViewBitmap(R.id.notification_image, BitmapHelper.getBitmapNetwork(
+                    getApplicationContext(), music.getTitle(), 160, 110));
             remoteViews.setTextViewText(R.id.notification_title, music.getTitle());
             remoteViews.setTextViewText(R.id.notification_artist, music.getArtist());
             remoteViews.setImageViewResource(R.id.notification_play, R.drawable.notification_pause);
@@ -336,6 +346,10 @@ public class MusicService extends Service {
 
         public void changeAlbum(int mAlbumId, int position, List<MusicInfo> mList) {
             if (mAlbumId == albumId) {
+                if (mList.size() > musicList.size()) {
+                    for (int i = musicList.size(); i < mList.size(); i++)
+                        musicList.add(mList.get(i));
+                }
                 id = position;
                 playMusic();
             } else {

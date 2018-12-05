@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.example.asus.syoucloud.internetSearch.InternetSearchActivity;
 import com.example.asus.syoucloud.bottomLayout.BottomLayoutFragment;
 import com.example.asus.syoucloud.musicShow.MusicShowActivity;
 import com.example.asus.syoucloud.tomatoClock.TomatoClockActivity;
@@ -75,14 +76,19 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener((item) -> {
             switch (item.getItemId()) {
                 case R.id.nav_alarm:
-                    Intent intent = new Intent(this, TomatoClockActivity.class);
-                    startActivity(intent);
+                    Intent toClock = new Intent(this, TomatoClockActivity.class);
+                    startActivity(toClock);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    break;
+                case R.id.nav_search:
+                    Intent toSearch = new Intent(this, InternetSearchActivity.class);
+                    startActivity(toSearch);
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                     break;
                 default:
                     mDrawerLayout.closeDrawers();
             }
-            return true;
+            return false;
         });
 
         ImageView mixAddImage = findViewById(R.id.mix_add);

@@ -116,12 +116,12 @@ public class MusicPlayActivity extends BaseActivity<musicPlayContract.IMusicPlay
     }
 
     @Override
-    public void initData(MusicInfo music, int progress, int style, boolean isPlay) {
+    public void initData(MusicInfo music, int duration, int progress, int style, boolean isPlay) {
         musicPlayArtist.setText(music.getArtist());
         musicPlayTitle.setText(music.getTitle());
-        musicPlayDuration.setText(TimeUtil.parseToString(music.getDuration() / 1000));
+        musicPlayDuration.setText(TimeUtil.parseToString(duration / 1000));
         musicPlayTime.setText(TimeUtil.parseToString(progress));
-        seekBar.setMax(music.getDuration() / 1000);
+        seekBar.setMax(duration / 1000);
         seekBar.setProgress(progress);
         setStyle(style);
         if (isPlay) pause();

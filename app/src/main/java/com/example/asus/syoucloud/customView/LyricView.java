@@ -234,6 +234,7 @@ public class LyricView extends View {
             if (lyricList.get(mid).getTime() <= time) l = mid + 1;
             else r = mid - 1;
         }
+        if (r == -1) r = 0;
         return r;
     }
 
