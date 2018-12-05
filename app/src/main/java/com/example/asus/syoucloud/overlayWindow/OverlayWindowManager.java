@@ -114,7 +114,8 @@ public class OverlayWindowManager implements View.OnTouchListener, View.OnClickL
 
     @Override
     public void lock() {
-        params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         onClick(clickLyric);
     }
 

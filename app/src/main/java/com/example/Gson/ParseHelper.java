@@ -64,7 +64,8 @@ public class ParseHelper {
         else second = 0;
         if (time.length > 2) millSecond = Integer.parseInt(time[2]);
         else millSecond = 0;
-        int all = millSecond * 10 + second * 1000 + minute * 1000 * 60;
+        if (millSecond < 100) millSecond *= 10;
+        int all = millSecond + second * 1000 + minute * 1000 * 60;
         if (all < 0) return;
         lyric.add(new LyricItem(all, text, translate));
     }

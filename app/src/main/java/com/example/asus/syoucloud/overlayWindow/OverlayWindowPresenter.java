@@ -18,6 +18,7 @@ public class OverlayWindowPresenter implements overlayWindowContract.IOverlayWin
 
     private static final String TAG = "OverlayWindowPresenter";
 
+    private long currentId;
     private MusicService.MusicPlayer musicPlayer;
     private overlayWindowContract.IOverlayWindowManager overlayWindowManager;
     private List<LyricItem> lyricList;
@@ -52,8 +53,9 @@ public class OverlayWindowPresenter implements overlayWindowContract.IOverlayWin
         overlayWindowManager.setPresenter(this);
         overlayWindowManager.initData(context);
 
+        currentId = musicPlayer.getMusic().getId();
         ThreadPool.getInstance().execute(() -> lyricList =
-                DataRepository.getInstance().searchLyric(musicPlayer.getMusic().getId()));
+                DataRepository.getInstance().searchLyric(currentId));
     }
 
     @Override
@@ -86,7 +88,14 @@ public class OverlayWindowPresenter implements overlayWindowContract.IOverlayWin
     public void showLyric() {
         if (isLyricShow) return;
         isLyricShow = true;
-        handler.post(updLyric);
+        long id = musicPlayer.getMusic().getId();
+        if (currentId != id) {
+            ThreadPool.getInstance().execute(() -> {
+                lyricList = DataRepository.getInstance().searchLyric(id);
+                currentId = id;
+                handler.post(updLyric);
+            });
+        } else handler.post(updLyric);
         musicPlayer.addListener(this, Constant.OVERLAY_TYPE);
         DataRepository.getInstance().addOverlayDownloadListener(this);
         overlayWindowManager.showLyric(musicPlayer.isPlay());
@@ -119,8 +128,11 @@ public class OverlayWindowPresenter implements overlayWindowContract.IOverlayWin
     @Override
     public void onMusicCompletion() {
         handler.removeCallbacks(updLyric);
+        line = -1;
+        Log.i(TAG, "onMusicCompletion: ");
         ThreadPool.getInstance().execute(() -> {
             lyricList = DataRepository.getInstance().searchLyric(musicPlayer.getMusic().getId());
+            Log.i(TAG, "onMusicCompletion: " + musicPlayer.getMusic().getId());
             handler.post(updLyric);
         });
     }
@@ -154,6 +166,7 @@ public class OverlayWindowPresenter implements overlayWindowContract.IOverlayWin
             if (lyricList.get(mid).getTime() <= time) l = mid + 1;
             else r = mid - 1;
         }
+        if (r == -1) r = 0;
         return r;
     }
 }
