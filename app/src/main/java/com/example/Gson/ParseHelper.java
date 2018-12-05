@@ -1,7 +1,5 @@
 package com.example.Gson;
 
-import android.util.Log;
-
 import com.example.Gson.Lyric.LyricInfo;
 import com.example.Gson.Lyric.LyricResult;
 import com.example.Gson.Music.MusicResult;
@@ -57,7 +55,6 @@ public class ParseHelper {
     }
 
     private static void timeRead(String s, String text, String translate) {
-        String TAG = "ParseHelper";
         s = s.replace(".", ":");
         String time[] = s.split(":");
         int minute, second, millSecond;

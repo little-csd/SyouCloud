@@ -22,6 +22,7 @@ import static com.example.asus.syoucloud.util.Constant.musicTarget;
 public class NetworkHelper {
 
     private static final String TAG = "NetworkHelper";
+    private static boolean isDownloading = false;
 
     public static void sendDownloadRequest(String address, okhttp3.Callback callback) {
         OkHttpClient client = new OkHttpClient();
@@ -32,12 +33,18 @@ public class NetworkHelper {
     }
 
     public static void downloadMusic(MusicResultItem music) {
+        if (isDownloading) {
+            Log.i(TAG, "downloadMusic: isDownloading");
+            return;
+        }
+        isDownloading = true;
         try {
             File target = new File(musicTarget);
             if (!target.exists()) {
                 boolean mkFile = target.mkdirs();
                 if (!mkFile) {
                     Log.i(TAG, "downloadMusic: make file fail");
+                    isDownloading = false;
                     return;
                 }
             }
@@ -45,6 +52,7 @@ public class NetworkHelper {
             File file = new File(fileName);
             if (file.exists()) {
                 Log.i(TAG, "downloadMusic: file has exist");
+                isDownloading = false;
                 return;
             }
             byte[] bt = new byte[2048];
@@ -62,6 +70,7 @@ public class NetworkHelper {
         } catch (Exception e) {
             e.printStackTrace();
             Log.i(TAG, "downloadMusic: " + e);
+            isDownloading = false;
         }
     }
 
@@ -73,6 +82,7 @@ public class NetworkHelper {
                 boolean mkFile = target.mkdirs();
                 if (!mkFile) {
                     Log.i(TAG, "downloadLyric: make file fail");
+                    isDownloading = false;
                     return;
                 }
             }
@@ -80,6 +90,7 @@ public class NetworkHelper {
             File file = new File(fileName);
             if (file.exists()) {
                 Log.i(TAG, "downloadLyric: file has exist");
+                isDownloading = false;
                 return;
             }
             byte[] bt = new byte[2048];
@@ -102,6 +113,7 @@ public class NetworkHelper {
                 mMusic.setUrl(address);
                 DataRepository.getInstance().addMusic(mMusic);
                 DataRepository.getInstance().hasLyricDownload(id, music.getName());
+                isDownloading = false;
             });
         } catch (Exception e) {
             Log.i(TAG, "downloadLyric: " + e);
@@ -116,6 +128,7 @@ public class NetworkHelper {
                 boolean mkFile = target.mkdirs();
                 if (!mkFile) {
                     Log.i(TAG, "downloadBmp: make file fail");
+                    isDownloading = false;
                     return;
                 }
             }
@@ -123,6 +136,7 @@ public class NetworkHelper {
             File file = new File(fileName);
             if (file.exists()) {
                 Log.i(TAG, "downloadBitmap: file has exist");
+                isDownloading = false;
                 return;
             }
             byte[] bt = new byte[2048];
@@ -140,6 +154,7 @@ public class NetworkHelper {
         } catch (Exception e) {
             Log.i(TAG, "downloadBitmap: " + e);
             e.printStackTrace();
+            isDownloading = false;
         }
     }
 
